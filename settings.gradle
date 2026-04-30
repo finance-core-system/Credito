@@ -1,0 +1,14 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'credito'
+
+include 'common'
+include 'customer-service'
+include 'account-service'
+include 'lending-service'
+include 'batch-service'
