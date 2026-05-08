@@ -13,7 +13,12 @@ java {
 }
 
 repositories {
-    mavenLocal()
+    exclusiveContent {
+        forRepository(mavenLocal())
+        filter {
+            includeGroup 'com.credito'
+        }
+    }
     mavenCentral()
 }
 
