@@ -24,8 +24,8 @@ spring:
                 - Path=/api/batch/**
   security:
     user:
-      name: ${MANAGEMENT_USERNAME:actuator}
-      password: ${MANAGEMENT_PASSWORD:change-me}
+      name: ${MANAGEMENT_USERNAME}
+      password: ${MANAGEMENT_PASSWORD}
 
 server:
   port: 8080
@@ -33,7 +33,7 @@ server:
 
 management:
   server:
-    port: ${MANAGEMENT_SERVER_PORT:9080}
+    port: ${MANAGEMENT_SERVER_PORT}
   endpoints:
     web:
       exposure:
