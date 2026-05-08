@@ -1,0 +1,180 @@
+services:
+  gateway-service:
+    build:
+      context: .
+      dockerfile: gateway-service/Dockerfile
+    container_name: credito-gateway-service
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      customer-service:
+        condition: service_healthy
+      account-service:
+        condition: service_healthy
+      lending-service:
+        condition: service_healthy
+      batch-service:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: ${GATEWAY_SERVER_PORT}
+      CUSTOMER_SERVICE_PORT: ${CUSTOMER_SERVICE_PORT}
+      ACCOUNT_SERVICE_PORT: ${ACCOUNT_SERVICE_PORT}
+      LENDING_SERVICE_PORT: ${LENDING_SERVICE_PORT}
+      BATCH_SERVICE_PORT: ${BATCH_SERVICE_PORT}
+      MANAGEMENT_SERVER_PORT: ${MANAGEMENT_SERVER_PORT}
+      MANAGEMENT_USERNAME: ${MANAGEMENT_USERNAME}
+      MANAGEMENT_PASSWORD: ${MANAGEMENT_PASSWORD}
+    ports:
+      - "${GATEWAY_PUBLIC_PORT}:${GATEWAY_SERVER_PORT}"
+    networks:
+      - public-net
+      - internal-net
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2.5
+    container_name: credito-keycloak
+    command: start-dev
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      KC_DB: mysql
+      KC_DB_URL_HOST: ${KC_DB_URL_HOST}
+      KC_DB_URL_PORT: ${KC_DB_URL_PORT}
+      KC_DB_URL_DATABASE: ${KC_DB_URL_DATABASE}
+      KC_DB_USERNAME: ${KC_DB_USERNAME}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
+      KC_HTTP_PORT: ${KEYCLOAK_SERVER_PORT}
+    ports:
+      - "${KEYCLOAK_PUBLIC_PORT}:${KEYCLOAK_SERVER_PORT}"
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/${KEYCLOAK_SERVER_PORT}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - public-net
+      - data-net
+
+  customer-service:
+    build:
+      context: .
+      dockerfile: customer-service/Dockerfile
+    container_name: credito-customer-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: ${CUSTOMER_SERVICE_PORT}
+    expose:
+      - "${CUSTOMER_SERVICE_PORT}"
+    networks:
+      - internal-net
+      - data-net
+
+  account-service:
+    build:
+      context: .
+      dockerfile: account-service/Dockerfile
+    container_name: credito-account-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: ${ACCOUNT_SERVICE_PORT}
+    expose:
+      - "${ACCOUNT_SERVICE_PORT}"
+    networks:
+      - internal-net
+      - data-net
+
+  lending-service:
+    build:
+      context: .
+      dockerfile: lending-service/Dockerfile
+    container_name: credito-lending-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: ${LENDING_SERVICE_PORT}
+    expose:
+      - "${LENDING_SERVICE_PORT}"
+    networks:
+      - internal-net
+      - data-net
+
+  batch-service:
+    build:
+      context: .
+      dockerfile: batch-service/Dockerfile
+    container_name: credito-batch-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: ${BATCH_SERVICE_PORT}
+    expose:
+      - "${BATCH_SERVICE_PORT}"
+    networks:
+      - internal-net
+      - data-net
+
+  mysql:
+    image: mysql:8.4
+    container_name: credito-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - data-net
+
+  redis:
+    image: redis:7.4
+    container_name: credito-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - data-net
+
+networks:
+  public-net:
+    driver: bridge
+  internal-net:
+    driver: bridge
+    internal: true
+  data-net:
+    driver: bridge
+    internal: true
+
+volumes:
+  mysql-data:
+  redis-data:
