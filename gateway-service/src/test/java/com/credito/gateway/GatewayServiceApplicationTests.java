@@ -11,6 +11,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -48,14 +52,16 @@ class GatewayServiceApplicationTests {
 
     @Test
     void configuresGatewayRoutesForAllBusinessServices() {
-        assertEquals("customer-service-route",
-            environment.getProperty("spring.cloud.gateway.server.webmvc.routes[0].id"));
-        assertEquals("account-service-route",
-            environment.getProperty("spring.cloud.gateway.server.webmvc.routes[1].id"));
-        assertEquals("lending-service-route",
-            environment.getProperty("spring.cloud.gateway.server.webmvc.routes[2].id"));
-        assertEquals("batch-service-route",
-            environment.getProperty("spring.cloud.gateway.server.webmvc.routes[3].id"));
+        Set<String> routeIds = IntStream.range(0, 4)
+            .mapToObj(index -> environment.getProperty("spring.cloud.gateway.server.webmvc.routes[" + index + "].id"))
+            .collect(Collectors.toSet());
+
+        assertEquals(Set.of(
+            "customer-service-route",
+            "account-service-route",
+            "lending-service-route",
+            "batch-service-route"
+        ), routeIds);
     }
 
     @Test
