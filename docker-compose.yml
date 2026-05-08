@@ -8,13 +8,13 @@ services:
       keycloak:
         condition: service_healthy
       customer-service:
-        condition: service_started
+        condition: service_healthy
       account-service:
-        condition: service_started
+        condition: service_healthy
       lending-service:
-        condition: service_started
+        condition: service_healthy
       batch-service:
-        condition: service_started
+        condition: service_healthy
     environment:
       SERVER_PORT: ${GATEWAY_SERVER_PORT}
       CUSTOMER_SERVICE_PORT: ${CUSTOMER_SERVICE_PORT}
