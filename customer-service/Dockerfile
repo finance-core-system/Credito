@@ -12,7 +12,9 @@ RUN chmod +x gradlew && \
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
-RUN groupadd --system credito && useradd --system --gid credito --create-home --home-dir /app credito
+RUN groupadd --system credito && \
+    useradd --system --gid credito --create-home --home-dir /app credito && \
+    chown -R credito:credito /app
 
 COPY --from=build --chown=credito:credito /workspace/customer-service/build/libs/*.jar app.jar
 
