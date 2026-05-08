@@ -1,13 +1,16 @@
 FROM eclipse-temurin:17-jdk-jammy AS build
 WORKDIR /workspace
 
-COPY gradlew gradlew.bat settings.gradle ./
+COPY gradlew gradlew.bat ./
 COPY gradle gradle
 COPY common common
 COPY customer-service customer-service
 
-RUN chmod +x gradlew && \
-    ./gradlew :customer-service:bootJar --no-daemon
+WORKDIR /workspace/customer-service
+
+RUN chmod +x ../gradlew && \
+    ../gradlew -p ../common publishToMavenLocal --no-daemon && \
+    ../gradlew bootJar --no-daemon
 
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app

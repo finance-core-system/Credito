@@ -1,0 +1,7 @@
+subprojects {
+    configurations.configureEach {
+        resolutionStrategy.dependencySubstitution {
+            substitute module('com.credito:common:0.0.1-SNAPSHOT') using project(':common')
+        }
+    }
+}
