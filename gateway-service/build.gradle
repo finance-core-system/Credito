@@ -14,7 +14,9 @@ java {
 
 repositories {
     exclusiveContent {
-        forRepository(mavenLocal())
+        forRepository {
+            mavenLocal()
+        }
         filter {
             includeGroup 'com.credito'
         }
