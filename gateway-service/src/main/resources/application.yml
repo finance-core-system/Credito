@@ -22,12 +22,18 @@ spring:
               uri: http://batch-service:8084
               predicates:
                 - Path=/api/batch/**
+  security:
+    user:
+      name: ${MANAGEMENT_USERNAME:actuator}
+      password: ${MANAGEMENT_PASSWORD:change-me}
 
 server:
   port: 8080
   forward-headers-strategy: framework
 
 management:
+  server:
+    port: ${MANAGEMENT_SERVER_PORT:9080}
   endpoints:
     web:
       exposure:
