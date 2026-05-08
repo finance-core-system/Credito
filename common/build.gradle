@@ -1,9 +1,10 @@
 plugins {
     id 'java-library'
+    id 'maven-publish'
 }
 
 group = 'com.credito'
-version = '0.0.1-SNAPSHOT'
+version = creditoVersion
 
 java {
     toolchain {
@@ -29,4 +30,13 @@ tasks.named('test') {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.release.set(17)
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = 'common'
+        }
+    }
 }
