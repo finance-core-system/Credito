@@ -8,6 +8,7 @@ pluginManagement {
 rootProject.name = 'credito'
 
 include 'common'
+include 'gateway-service'
 include 'customer-service'
 include 'account-service'
 include 'lending-service'

@@ -8,6 +8,7 @@ class CreditoServiceNamesTest {
 
     @Test
     void definesServiceNames() {
+        assertEquals("gateway-service", CreditoServiceNames.GATEWAY_SERVICE);
         assertEquals("customer-service", CreditoServiceNames.CUSTOMER_SERVICE);
         assertEquals("account-service", CreditoServiceNames.ACCOUNT_SERVICE);
         assertEquals("lending-service", CreditoServiceNames.LENDING_SERVICE);
