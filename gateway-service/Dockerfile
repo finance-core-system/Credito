@@ -6,14 +6,18 @@ COPY gradle gradle
 COPY common common
 COPY gateway-service gateway-service
 
-RUN chmod +x gradlew
-RUN ./gradlew :gateway-service:bootJar --no-daemon
+RUN chmod +x gradlew && \
+    ./gradlew :gateway-service:bootJar --no-daemon
 
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
-COPY --from=build /workspace/gateway-service/build/libs/*.jar app.jar
+RUN groupadd --system credito && useradd --system --gid credito --create-home --home-dir /app credito
+
+COPY --from=build --chown=credito:credito /workspace/gateway-service/build/libs/*.jar app.jar
 
 EXPOSE 8080 9080
+
+USER credito
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
