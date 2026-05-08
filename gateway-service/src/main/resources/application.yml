@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: customer-service-route
+              uri: http://customer-service:8081
+              predicates:
+                - Path=/api/customers/**
+            - id: account-service-route
+              uri: http://account-service:8082
+              predicates:
+                - Path=/api/accounts/**
+            - id: lending-service-route
+              uri: http://lending-service:8083
+              predicates:
+                - Path=/api/lendings/**
+            - id: batch-service-route
+              uri: http://batch-service:8084
+              predicates:
+                - Path=/api/batch/**
+  security:
+    user:
+      name: ${MANAGEMENT_USERNAME}
+      password: ${MANAGEMENT_PASSWORD}
+
+server:
+  port: 8080
+  forward-headers-strategy: framework
+
+management:
+  server:
+    port: ${MANAGEMENT_SERVER_PORT}
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
