@@ -21,6 +21,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {
+        "SERVER_PORT=0",
+        "CUSTOMER_SERVICE_PORT=8081",
+        "ACCOUNT_SERVICE_PORT=8082",
+        "LENDING_SERVICE_PORT=8083",
+        "BATCH_SERVICE_PORT=8084",
         "MANAGEMENT_SERVER_PORT=0",
         "MANAGEMENT_USERNAME=test-actuator",
         "MANAGEMENT_PASSWORD=test-secret"

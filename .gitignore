@@ -10,3 +10,7 @@ out/
 
 .DS_Store
 /docs/
+.env
+.env.local
+.env
+!.env
