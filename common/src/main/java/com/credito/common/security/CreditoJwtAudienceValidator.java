@@ -2,6 +2,7 @@ package com.credito.common.security;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.security.oauth2.core.OAuth2Error;
@@ -14,6 +15,7 @@ public final class CreditoJwtAudienceValidator implements OAuth2TokenValidator<J
     private final Set<String> audiences;
 
     public CreditoJwtAudienceValidator(Collection<String> audiences) {
+        Objects.requireNonNull(audiences, "허용 audience 목록은 null일 수 없습니다.");
         this.audiences = Set.copyOf(new LinkedHashSet<>(audiences));
     }
 
@@ -24,7 +26,13 @@ public final class CreditoJwtAudienceValidator implements OAuth2TokenValidator<J
                 new OAuth2Error("invalid_token", "필수 audience 설정이 비어 있습니다.", null));
         }
 
-        boolean accepted = token.getAudience().stream().anyMatch(audiences::contains);
+        Collection<String> tokenAudiences = token.getAudience();
+        if (tokenAudiences == null || tokenAudiences.isEmpty()) {
+            return OAuth2TokenValidatorResult.failure(
+                new OAuth2Error("invalid_token", "토큰 audience가 비어 있습니다.", null));
+        }
+
+        boolean accepted = tokenAudiences.stream().anyMatch(audiences::contains);
         if (accepted) {
             return OAuth2TokenValidatorResult.success();
         }
