@@ -36,9 +36,20 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
-        /opt/keycloak/bin/kc.sh import --file /opt/keycloak/data/import/customer-realm.json --override false &&
-        /opt/keycloak/bin/kc.sh import --file /opt/keycloak/data/import/admin-realm.json --override false &&
-        /opt/keycloak/bin/kc.sh import --file /opt/keycloak/data/import/system-realm.json --override false &&
+        import_realm() {
+          realm_name="$${1}"
+          realm_file="/opt/keycloak/data/import/$${realm_name}.json"
+          echo "Importing Keycloak realm: $${realm_name}"
+          if /opt/keycloak/bin/kc.sh import --file "$${realm_file}" --override false; then
+            echo "Imported Keycloak realm: $${realm_name}"
+          else
+            echo "Failed to import Keycloak realm: $${realm_name}" >&2
+            exit 1
+          fi
+        }
+        import_realm customer-realm
+        import_realm admin-realm
+        import_realm system-realm
         exec /opt/keycloak/bin/kc.sh start-dev
     depends_on:
       mysql:
