@@ -1,0 +1,57 @@
+{
+  "realm": "system-realm",
+  "enabled": true,
+  "displayName": "Credito System Realm",
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": false,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "bruteForceProtected": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "ROLE_INTERNAL_SERVICE",
+        "description": "Internal service account access"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "credito-service-client",
+      "name": "Credito Service Client",
+      "description": "Development client for internal service-token issuance",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "dev-service-client-secret",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "frontchannelLogout": false,
+      "protocolMappers": [
+        {
+          "name": "credito-internal-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "credito-internal-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ],
+      "defaultClientScopes": [
+        "roles",
+        "profile",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "microprofile-jwt"
+      ]
+    }
+  ]
+}
