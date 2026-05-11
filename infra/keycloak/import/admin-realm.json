@@ -8,6 +8,21 @@
   "duplicateEmailsAllowed": false,
   "resetPasswordAllowed": true,
   "bruteForceProtected": true,
+  "otpPolicyType": "totp",
+  "otpPolicyAlgorithm": "HmacSHA1",
+  "otpPolicyDigits": 6,
+  "otpPolicyLookAheadWindow": 1,
+  "otpPolicyPeriod": 30,
+  "requiredActions": [
+    {
+      "alias": "CONFIGURE_TOTP",
+      "name": "Configure OTP",
+      "providerId": "CONFIGURE_TOTP",
+      "enabled": true,
+      "defaultAction": true,
+      "priority": 10
+    }
+  ],
   "roles": {
     "realm": [
       {
@@ -28,6 +43,59 @@
       }
     ]
   },
+  "groups": [
+    {
+      "name": "operators",
+      "path": "/operators",
+      "realmRoles": [
+        "ROLE_OPERATOR"
+      ],
+      "attributes": {
+        "responsibility": [
+          "Default operator access for admin console login and read-only operations"
+        ]
+      }
+    },
+    {
+      "name": "loan-reviewers",
+      "path": "/loan-reviewers",
+      "realmRoles": [
+        "ROLE_OPERATOR",
+        "ROLE_LOAN_REVIEWER"
+      ],
+      "attributes": {
+        "responsibility": [
+          "Loan application review and underwriting workflow access"
+        ]
+      }
+    },
+    {
+      "name": "managers",
+      "path": "/managers",
+      "realmRoles": [
+        "ROLE_OPERATOR",
+        "ROLE_MANAGER"
+      ],
+      "attributes": {
+        "responsibility": [
+          "Manager approval and elevated operational decision access"
+        ]
+      }
+    },
+    {
+      "name": "batch-admins",
+      "path": "/batch-admins",
+      "realmRoles": [
+        "ROLE_OPERATOR",
+        "ROLE_BATCH_ADMIN"
+      ],
+      "attributes": {
+        "responsibility": [
+          "Batch job operation and administrative maintenance access"
+        ]
+      }
+    }
+  ],
   "clients": [
     {
       "clientId": "credito-admin-console",
@@ -63,6 +131,20 @@
             "included.custom.audience": "credito-admin-api",
             "access.token.claim": "true",
             "id.token.claim": "false"
+          }
+        },
+        {
+          "name": "admin-realm-roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "userinfo.token.claim": "true"
           }
         }
       ],
