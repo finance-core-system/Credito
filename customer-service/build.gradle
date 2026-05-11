@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.5.13'
+    id 'org.springframework.boot' version '3.5.14'
 }
 
 group = 'com.credito'
@@ -26,11 +26,13 @@ repositories {
 
 dependencies {
     implementation "com.credito:common:${creditoVersion}"
-    implementation 'org.springframework.boot:spring-boot-starter-actuator:3.5.13'
-    implementation 'org.springframework.boot:spring-boot-starter-validation:3.5.13'
-    implementation 'org.springframework.boot:spring-boot-starter-web:3.5.13'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator:3.5.14'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server:3.5.14'
+    implementation 'org.springframework.boot:spring-boot-starter-security:3.5.14'
+    implementation 'org.springframework.boot:spring-boot-starter-validation:3.5.14'
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.5.14'
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.5.13'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.5.14'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.12.2'
 }
 

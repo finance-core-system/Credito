@@ -27,6 +27,22 @@ spring:
       name: ${MANAGEMENT_USERNAME}
       password: ${MANAGEMENT_PASSWORD}
 
+credito:
+  security:
+    resource-server:
+      audiences:
+        - credito-api
+        - credito-admin-api
+      issuers:
+        - issuer-uri: ${CUSTOMER_REALM_ISSUER_URI}
+          jwk-set-uri: ${CUSTOMER_REALM_JWK_SET_URI}
+        - issuer-uri: ${CUSTOMER_REALM_INTERNAL_ISSUER_URI}
+          jwk-set-uri: ${CUSTOMER_REALM_INTERNAL_JWK_SET_URI}
+        - issuer-uri: ${ADMIN_REALM_ISSUER_URI}
+          jwk-set-uri: ${ADMIN_REALM_JWK_SET_URI}
+        - issuer-uri: ${ADMIN_REALM_INTERNAL_ISSUER_URI}
+          jwk-set-uri: ${ADMIN_REALM_INTERNAL_JWK_SET_URI}
+
 server:
   port: ${SERVER_PORT}
   forward-headers-strategy: framework

@@ -24,7 +24,7 @@ COPY --from=build --chown=credito:credito /workspace/gateway-service/build/libs/
 EXPOSE 8080 9080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-    CMD ["bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/${MANAGEMENT_SERVER_PORT} && printf 'GET /actuator/health HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 && grep '200 OK' <&3 >/dev/null"]
+    CMD ["bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/${MANAGEMENT_SERVER_PORT} && printf 'GET /actuator/health HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 && grep 'HTTP/1.1 200' <&3 >/dev/null"]
 
 USER credito
 
