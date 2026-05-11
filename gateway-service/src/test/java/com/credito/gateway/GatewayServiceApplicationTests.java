@@ -20,17 +20,25 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = {
-        "SERVER_PORT=0",
-        "CUSTOMER_SERVICE_PORT=8081",
-        "ACCOUNT_SERVICE_PORT=8082",
-        "LENDING_SERVICE_PORT=8083",
-        "BATCH_SERVICE_PORT=8084",
-        "MANAGEMENT_SERVER_PORT=0",
-        "MANAGEMENT_USERNAME=test-actuator",
-        "MANAGEMENT_PASSWORD=test-secret"
-    }
-)
+	    properties = {
+	        "SERVER_PORT=0",
+	        "CUSTOMER_SERVICE_PORT=8081",
+	        "ACCOUNT_SERVICE_PORT=8082",
+	        "LENDING_SERVICE_PORT=8083",
+	        "BATCH_SERVICE_PORT=8084",
+	        "MANAGEMENT_SERVER_PORT=0",
+	        "MANAGEMENT_USERNAME=test-actuator",
+	        "MANAGEMENT_PASSWORD=test-secret",
+	        "CUSTOMER_REALM_ISSUER_URI=http://localhost:8085/realms/customer-realm",
+	        "CUSTOMER_REALM_JWK_SET_URI=http://localhost:8085/realms/customer-realm/protocol/openid-connect/certs",
+	        "CUSTOMER_REALM_INTERNAL_ISSUER_URI=http://keycloak:8080/realms/customer-realm",
+	        "CUSTOMER_REALM_INTERNAL_JWK_SET_URI=http://localhost:8085/realms/customer-realm/protocol/openid-connect/certs",
+	        "ADMIN_REALM_ISSUER_URI=http://localhost:8085/realms/admin-realm",
+	        "ADMIN_REALM_JWK_SET_URI=http://localhost:8085/realms/admin-realm/protocol/openid-connect/certs",
+	        "ADMIN_REALM_INTERNAL_ISSUER_URI=http://keycloak:8080/realms/admin-realm",
+	        "ADMIN_REALM_INTERNAL_JWK_SET_URI=http://localhost:8085/realms/admin-realm/protocol/openid-connect/certs"
+	    }
+	)
 class GatewayServiceApplicationTests {
 
     @Autowired
@@ -75,23 +83,23 @@ class GatewayServiceApplicationTests {
             "http://localhost:" + applicationPort + "/actuator/gateway/routes",
             String.class);
 
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 
     @Test
-    void securesGatewayActuatorEndpointOnManagementPort() {
+    void securesActuatorLinksOnManagementPort() {
         ResponseEntity<String> unauthorizedResponse = restTemplate.getForEntity(
-            "http://localhost:" + managementPort + "/actuator/gateway/routes",
+            "http://localhost:" + managementPort + "/actuator",
             String.class);
 
         assertEquals(HttpStatus.UNAUTHORIZED, unauthorizedResponse.getStatusCode());
 
         ResponseEntity<String> authorizedResponse = restTemplate
             .withBasicAuth(managementUsername, managementPassword)
-            .getForEntity("http://localhost:" + managementPort + "/actuator/gateway/routes", String.class);
+            .getForEntity("http://localhost:" + managementPort + "/actuator", String.class);
 
         assertEquals(HttpStatus.OK, authorizedResponse.getStatusCode());
-        assertTrue(authorizedResponse.getBody() != null && authorizedResponse.getBody().contains("route_id"));
+        assertTrue(authorizedResponse.getBody() != null && authorizedResponse.getBody().contains("health"));
     }
 
     @Test
@@ -101,5 +109,14 @@ class GatewayServiceApplicationTests {
             String.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void applicationRoutesRequireAuthentication() {
+        ResponseEntity<String> response = restTemplate.getForEntity(
+            "http://localhost:" + applicationPort + "/api/customers",
+            String.class);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 }

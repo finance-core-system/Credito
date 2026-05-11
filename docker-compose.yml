@@ -1,3 +1,13 @@
+x-resource-server-env: &resource-server-env
+  CUSTOMER_REALM_ISSUER_URI: ${CUSTOMER_REALM_ISSUER_URI:?CUSTOMER_REALM_ISSUER_URI is required}
+  CUSTOMER_REALM_JWK_SET_URI: ${CUSTOMER_REALM_JWK_SET_URI:?CUSTOMER_REALM_JWK_SET_URI is required}
+  CUSTOMER_REALM_INTERNAL_ISSUER_URI: ${CUSTOMER_REALM_INTERNAL_ISSUER_URI:?CUSTOMER_REALM_INTERNAL_ISSUER_URI is required}
+  CUSTOMER_REALM_INTERNAL_JWK_SET_URI: ${CUSTOMER_REALM_INTERNAL_JWK_SET_URI:?CUSTOMER_REALM_INTERNAL_JWK_SET_URI is required}
+  ADMIN_REALM_ISSUER_URI: ${ADMIN_REALM_ISSUER_URI:?ADMIN_REALM_ISSUER_URI is required}
+  ADMIN_REALM_JWK_SET_URI: ${ADMIN_REALM_JWK_SET_URI:?ADMIN_REALM_JWK_SET_URI is required}
+  ADMIN_REALM_INTERNAL_ISSUER_URI: ${ADMIN_REALM_INTERNAL_ISSUER_URI:?ADMIN_REALM_INTERNAL_ISSUER_URI is required}
+  ADMIN_REALM_INTERNAL_JWK_SET_URI: ${ADMIN_REALM_INTERNAL_JWK_SET_URI:?ADMIN_REALM_INTERNAL_JWK_SET_URI is required}
+
 services:
   gateway-service:
     build:
@@ -16,6 +26,7 @@ services:
       batch-service:
         condition: service_healthy
     environment:
+      <<: *resource-server-env
       SERVER_PORT: ${GATEWAY_SERVER_PORT}
       CUSTOMER_SERVICE_PORT: ${CUSTOMER_SERVICE_PORT}
       ACCOUNT_SERVICE_PORT: ${ACCOUNT_SERVICE_PORT}
@@ -89,6 +100,7 @@ services:
       redis:
         condition: service_healthy
     environment:
+      <<: *resource-server-env
       SERVER_PORT: ${CUSTOMER_SERVICE_PORT}
     expose:
       - "${CUSTOMER_SERVICE_PORT}"
@@ -107,6 +119,7 @@ services:
       redis:
         condition: service_healthy
     environment:
+      <<: *resource-server-env
       SERVER_PORT: ${ACCOUNT_SERVICE_PORT}
     expose:
       - "${ACCOUNT_SERVICE_PORT}"
@@ -125,6 +138,7 @@ services:
       redis:
         condition: service_healthy
     environment:
+      <<: *resource-server-env
       SERVER_PORT: ${LENDING_SERVICE_PORT}
     expose:
       - "${LENDING_SERVICE_PORT}"
@@ -143,6 +157,7 @@ services:
       redis:
         condition: service_healthy
     environment:
+      <<: *resource-server-env
       SERVER_PORT: ${BATCH_SERVICE_PORT}
     expose:
       - "${BATCH_SERVICE_PORT}"

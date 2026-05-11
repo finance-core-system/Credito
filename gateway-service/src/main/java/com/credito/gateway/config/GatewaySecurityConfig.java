@@ -1,8 +1,11 @@
 package com.credito.gateway.config;
 
+import com.credito.common.security.CreditoResourceServerProperties;
+import com.credito.common.security.CreditoResourceServerSecurity;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.actuate.info.InfoEndpoint;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -12,6 +15,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableConfigurationProperties(CreditoResourceServerProperties.class)
 public class GatewaySecurityConfig {
 
     @Bean
@@ -29,10 +33,10 @@ public class GatewaySecurityConfig {
 
     @Bean
     @Order(2)
-    SecurityFilterChain applicationSecurityFilterChain(HttpSecurity http) throws Exception {
-        return http
-            .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
-            .csrf(AbstractHttpConfigurer::disable)
-            .build();
+    SecurityFilterChain applicationSecurityFilterChain(
+        HttpSecurity http,
+        CreditoResourceServerProperties properties
+    ) throws Exception {
+        return CreditoResourceServerSecurity.securityFilterChain(http, properties);
     }
 }
