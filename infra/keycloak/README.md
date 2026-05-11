@@ -8,6 +8,8 @@ This directory contains the development Keycloak realm import used by Docker Com
 
 Realm import is intended for local and CI development bootstrap only. Client secrets in the import files are fixed development values and must not be reused in production.
 
+Compose imports use `--override false`, so existing realms in the MySQL volume are not overwritten on restart. Reset the `mysql-data` volume when a local environment needs to be re-bootstrapped from the current import files.
+
 ## Realms
 
 | Realm | Issuer | Purpose |
@@ -40,3 +42,18 @@ Resource servers should validate:
 - `exp`: token expiry.
 
 The service-specific JWT validation and service-token authorization rules are intentionally handled in later security issues.
+
+## Admin MFA and roles
+
+`admin-realm` enables TOTP as the default required action for operator accounts. New operator users must configure OTP during login, and the default browser authentication flow will require OTP after it is configured.
+
+Admin role assignment should be group-based:
+
+| Group | Realm roles | Responsibility |
+| --- | --- | --- |
+| `operators` | `ROLE_OPERATOR` | Default admin console access and read-only operational work |
+| `loan-reviewers` | `ROLE_OPERATOR`, `ROLE_LOAN_REVIEWER` | Loan application review and underwriting workflow access |
+| `managers` | `ROLE_OPERATOR`, `ROLE_MANAGER` | Manager approval and elevated operational decisions |
+| `batch-admins` | `ROLE_OPERATOR`, `ROLE_BATCH_ADMIN` | Batch job operation and administrative maintenance |
+
+`credito-admin-console` includes an `admin-realm-roles` mapper. Admin access tokens include realm roles in a top-level `roles` claim as a string array so Spring services can map them to authorities without depending on Keycloak-specific nested claims. Keycloak's standard `realm_access.roles` claim is still available through the default `roles` client scope.
