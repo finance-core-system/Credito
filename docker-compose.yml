@@ -33,7 +33,24 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.2.5
     container_name: credito-keycloak
-    command: start-dev
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        import_realm() {
+          realm_name="$${1}"
+          realm_file="/opt/keycloak/data/import/$${realm_name}.json"
+          echo "Importing Keycloak realm: $${realm_name}"
+          if /opt/keycloak/bin/kc.sh import --file "$${realm_file}" --override false; then
+            echo "Imported Keycloak realm: $${realm_name}"
+          else
+            echo "Failed to import Keycloak realm: $${realm_name}" >&2
+            exit 1
+          fi
+        }
+        import_realm customer-realm
+        import_realm admin-realm
+        import_realm system-realm
+        exec /opt/keycloak/bin/kc.sh start-dev
     depends_on:
       mysql:
         condition: service_healthy
@@ -47,6 +64,8 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:?KC_BOOTSTRAP_ADMIN_USERNAME is required}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:?KC_BOOTSTRAP_ADMIN_PASSWORD is required}
       KC_HTTP_PORT: ${KEYCLOAK_SERVER_PORT}
+    volumes:
+      - ./infra/keycloak/import:/opt/keycloak/data/import:ro
     ports:
       - "${KEYCLOAK_PUBLIC_PORT}:${KEYCLOAK_SERVER_PORT}"
     healthcheck:
