@@ -35,9 +35,7 @@
       "description": "Development client for operator login",
       "enabled": true,
       "protocol": "openid-connect",
-      "publicClient": false,
-      "clientAuthenticatorType": "client-secret",
-      "secret": "dev-admin-console-secret",
+      "publicClient": true,
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
       "directAccessGrantsEnabled": false,
@@ -52,6 +50,7 @@
         "http://localhost:3000"
       ],
       "attributes": {
+        "pkce.code.challenge.method": "S256",
         "post.logout.redirect.uris": "http://localhost:8080/admin/*##http://localhost:3000/admin/*"
       },
       "protocolMappers": [
