@@ -2,7 +2,9 @@ package com.credito.common.protocol.fixedlength;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * Payload 앞에 ASCII length prefix를 붙이거나 제거하는 frame codec입니다.
@@ -20,6 +22,8 @@ import java.util.Objects;
  */
 public final class LengthPrefixedFrameCodec {
 
+    private static final Pattern ASCII_DIGITS = Pattern.compile("^[0-9]+$");
+
     private final int prefixLength;
 
     public LengthPrefixedFrameCodec(int prefixLength) {
@@ -36,7 +40,7 @@ public final class LengthPrefixedFrameCodec {
             throw new FixedLengthMessageException("payload 길이가 prefix 자릿수를 초과했습니다.");
         }
 
-        byte[] prefix = String.format("%0" + prefixLength + "d", payload.length)
+        byte[] prefix = String.format(Locale.ROOT, "%0" + prefixLength + "d", payload.length)
             .getBytes(StandardCharsets.US_ASCII);
         byte[] frame = Arrays.copyOf(prefix, prefix.length + payload.length);
         System.arraycopy(payload, 0, frame, prefix.length, payload.length);
@@ -62,6 +66,9 @@ public final class LengthPrefixedFrameCodec {
 
     private int parsePayloadLength(byte[] frame) {
         String prefix = new String(frame, 0, prefixLength, StandardCharsets.US_ASCII);
+        if (!ASCII_DIGITS.matcher(prefix).matches()) {
+            throw new FixedLengthMessageException("길이 prefix는 ASCII 숫자여야 합니다.");
+        }
         try {
             return Integer.parseInt(prefix);
         } catch (NumberFormatException exception) {

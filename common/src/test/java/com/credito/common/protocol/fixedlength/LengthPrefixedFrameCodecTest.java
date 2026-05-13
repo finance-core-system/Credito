@@ -1,6 +1,7 @@
 package com.credito.common.protocol.fixedlength;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +19,21 @@ class LengthPrefixedFrameCodecTest {
         byte[] frame = codec.encode("PING".getBytes(StandardCharsets.UTF_8));
 
         assertEquals("0004PING", new String(frame, StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void encodesFrameWithAsciiLengthPrefixRegardlessOfDefaultLocale() {
+        Locale originalLocale = Locale.getDefault();
+        try {
+            Locale.setDefault(Locale.forLanguageTag("ar"));
+            LengthPrefixedFrameCodec codec = new LengthPrefixedFrameCodec(4);
+
+            byte[] frame = codec.encode("PING".getBytes(StandardCharsets.UTF_8));
+
+            assertEquals("0004PING", new String(frame, StandardCharsets.US_ASCII));
+        } finally {
+            Locale.setDefault(originalLocale);
+        }
     }
 
     @Test
@@ -40,9 +56,24 @@ class LengthPrefixedFrameCodecTest {
     void rejectsNonNumericLengthPrefix() {
         LengthPrefixedFrameCodec codec = new LengthPrefixedFrameCodec(4);
 
+        assertThrows(FixedLengthMessageException.class, () -> codec.decode("00A4PING".getBytes(StandardCharsets.UTF_8)));
+    }
+
+    @Test
+    void rejectsSignedLengthPrefix() {
+        LengthPrefixedFrameCodec codec = new LengthPrefixedFrameCodec(4);
+
+        assertThrows(FixedLengthMessageException.class, () -> codec.decode("+004PING".getBytes(StandardCharsets.UTF_8)));
+        assertThrows(FixedLengthMessageException.class, () -> codec.decode("-004PING".getBytes(StandardCharsets.UTF_8)));
+    }
+
+    @Test
+    void preservesCauseWhenNumericPrefixOverflowsInteger() {
+        LengthPrefixedFrameCodec codec = new LengthPrefixedFrameCodec(10);
+
         FixedLengthMessageException exception = assertThrows(
             FixedLengthMessageException.class,
-            () -> codec.decode("00A4PING".getBytes(StandardCharsets.UTF_8)));
+            () -> codec.decode("9999999999PING".getBytes(StandardCharsets.UTF_8)));
 
         assertInstanceOf(NumberFormatException.class, exception.getCause());
     }
