@@ -10,6 +10,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class TraceIdFilterTest {
@@ -35,5 +36,18 @@ class TraceIdFilterTest {
 
         assertNotNull(request.getAttribute(TraceIdFilter.REQUEST_ATTRIBUTE));
         assertNotNull(response.getHeader(TraceIdFilter.TRACE_ID_HEADER));
+    }
+
+    @Test
+    void createsTraceIdWhenHeaderContainsInvalidCharacters() throws ServletException, IOException {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        request.addHeader(TraceIdFilter.TRACE_ID_HEADER, "trace\r\npolluted");
+
+        new TraceIdFilter().doFilter(request, response, new MockFilterChain());
+
+        assertNotEquals("trace\r\npolluted", request.getAttribute(TraceIdFilter.REQUEST_ATTRIBUTE));
+        assertNotEquals("trace\r\npolluted", response.getHeader(TraceIdFilter.TRACE_ID_HEADER));
+        assertNotNull(request.getAttribute(TraceIdFilter.REQUEST_ATTRIBUTE));
     }
 }

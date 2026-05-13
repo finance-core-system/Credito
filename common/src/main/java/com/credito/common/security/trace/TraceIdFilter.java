@@ -2,6 +2,7 @@ package com.credito.common.security.trace;
 
 import java.io.IOException;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -30,6 +31,8 @@ public class TraceIdFilter extends OncePerRequestFilter {
     public static final String TRACE_ID_HEADER = "X-Trace-Id";
     public static final String MDC_TRACE_ID_KEY = "traceId";
     public static final String REQUEST_ATTRIBUTE = TraceIdFilter.class.getName() + ".TRACE_ID";
+    private static final int MAX_TRACE_ID_LENGTH = 128;
+    private static final Pattern ALLOWED_TRACE_ID = Pattern.compile("^[A-Za-z0-9._-]+$");
 
     @Override
     protected void doFilterInternal(
@@ -50,8 +53,13 @@ public class TraceIdFilter extends OncePerRequestFilter {
 
     private static String traceId(HttpServletRequest request) {
         String header = request.getHeader(TRACE_ID_HEADER);
-        if (header != null && !header.isBlank() && header.length() <= 128) {
-            return header.trim();
+        if (header == null) {
+            return UUID.randomUUID().toString();
+        }
+
+        String traceId = header.trim();
+        if (!traceId.isBlank() && traceId.length() <= MAX_TRACE_ID_LENGTH && ALLOWED_TRACE_ID.matcher(traceId).matches()) {
+            return traceId;
         }
         return UUID.randomUUID().toString();
     }
