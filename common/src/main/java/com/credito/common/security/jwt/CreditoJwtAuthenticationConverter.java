@@ -1,4 +1,4 @@
-package com.credito.common.security;
+package com.credito.common.security.jwt;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -12,6 +12,20 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 
+/**
+ * JWT claim을 Spring Security 인증 객체로 변환하는 converter factory입니다.
+ *
+ * <p>기본 scope authority에 더해 top-level roles와 Keycloak realm_access roles를
+ * ROLE_ authority로 변환해 {@link JwtAuthenticationToken}을 생성합니다.</p>
+ *
+ * <p>주요 책임</p>
+ * <ul>
+ *     <li>JWT scope claim을 authority로 변환</li>
+ *     <li>top-level roles claim을 ROLE_ authority로 변환</li>
+ *     <li>realm_access.roles claim을 ROLE_ authority로 변환</li>
+ *     <li>preferred_username 또는 subject를 principal name으로 선택</li>
+ * </ul>
+ */
 public final class CreditoJwtAuthenticationConverter {
 
     private CreditoJwtAuthenticationConverter() {

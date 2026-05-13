@@ -1,5 +1,7 @@
 package com.credito.common.security;
 
+import com.credito.common.security.jwt.CreditoJwtAudienceValidator;
+import com.credito.common.security.jwt.CreditoJwtAuthenticationConverter;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -16,6 +18,20 @@ import org.springframework.security.web.SecurityFilterChain;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Credito 서비스의 공통 resource server 보안 구성을 생성하는 유틸리티 클래스입니다.
+ *
+ * <p>{@link CreditoResourceServerProperties}에 바인딩된 issuer, JWK set URI, audience 설정을 기반으로
+ * JWT decoder와 authentication manager resolver를 구성한 뒤 Spring Security filter chain을 생성합니다.</p>
+ *
+ * <p>주요 책임</p>
+ * <ul>
+ *     <li>public path와 인증 필요 path 구분</li>
+ *     <li>issuer별 JWT decoder 구성</li>
+ *     <li>issuer와 audience 검증 연결</li>
+ *     <li>JWT claim을 Spring Security authority로 변환</li>
+ * </ul>
+ */
 public final class CreditoResourceServerSecurity {
 
     private CreditoResourceServerSecurity() {

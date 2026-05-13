@@ -1,4 +1,4 @@
-package com.credito.common.security;
+package com.credito.common.security.jwt;
 
 import java.time.Instant;
 import java.util.List;
