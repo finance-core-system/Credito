@@ -38,7 +38,12 @@ public final class ServiceTokenValidator {
             return ServiceTokenValidationResult.invalid("허용되지 않은 issuer입니다.");
         }
 
-        boolean audienceAccepted = jwt.getAudience().stream()
+        Collection<String> audiences = jwt.getAudience();
+        if (audiences == null || audiences.isEmpty()) {
+            return ServiceTokenValidationResult.invalid("토큰 audience가 비어 있습니다.");
+        }
+
+        boolean audienceAccepted = audiences.stream()
             .anyMatch(audience -> contains(allowedAudiences, audience));
         if (!audienceAccepted) {
             return ServiceTokenValidationResult.invalid("허용되지 않은 audience입니다.");
@@ -49,7 +54,7 @@ public final class ServiceTokenValidator {
             return ServiceTokenValidationResult.invalid("허용되지 않은 client_id입니다.");
         }
 
-        return ServiceTokenValidationResult.valid(issuer, clientId, Set.copyOf(jwt.getAudience()));
+        return ServiceTokenValidationResult.valid(issuer, clientId, Set.copyOf(audiences));
     }
 
     private static String clientId(Jwt jwt) {
