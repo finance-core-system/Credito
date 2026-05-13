@@ -6,7 +6,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 
 /**
  * 인증된 주체의 보안 정보를 서비스 로직에서 쓰기 쉽게 담는 불변 컨텍스트입니다.
@@ -50,12 +52,14 @@ public record SecurityContext(
     }
 
     public static SecurityContext from(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
+        if (authentication == null
+            || !authentication.isAuthenticated()
+            || authentication instanceof AnonymousAuthenticationToken) {
             return anonymous();
         }
 
         Set<String> authorities = authentication.getAuthorities().stream()
-            .map(Object::toString)
+            .map(GrantedAuthority::getAuthority)
             .collect(Collectors.toSet());
 
         return new SecurityContext(

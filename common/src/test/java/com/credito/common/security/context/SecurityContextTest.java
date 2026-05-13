@@ -3,8 +3,12 @@ package com.credito.common.security.context;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SecurityContextTest {
@@ -37,5 +41,32 @@ class SecurityContextTest {
 
         assertTrue(context.authenticated());
         assertTrue(context.authorities().isEmpty());
+    }
+
+    @Test
+    void treatsAnonymousAuthenticationAsAnonymousContext() {
+        AnonymousAuthenticationToken authentication = new AnonymousAuthenticationToken(
+            "key",
+            "anonymousUser",
+            List.of(new SimpleGrantedAuthority("ROLE_ANONYMOUS")));
+
+        SecurityContext context = SecurityContext.from(authentication);
+
+        assertFalse(context.authenticated());
+        assertTrue(context.authorities().isEmpty());
+    }
+
+    @Test
+    void extractsAuthoritiesUsingGrantedAuthorityContract() {
+        TestingAuthenticationToken authentication = new TestingAuthenticationToken(
+            "principal",
+            "credentials",
+            List.of(() -> "ROLE_CUSTOMER"));
+        authentication.setAuthenticated(true);
+
+        SecurityContext context = SecurityContext.from(authentication);
+
+        assertEquals("principal", context.principalId());
+        assertTrue(context.hasAuthority("ROLE_CUSTOMER"));
     }
 }
