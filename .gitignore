@@ -9,6 +9,6 @@ out/
 *.iml
 
 .DS_Store
-/docs/
+/docs/issues/
 .env
 .env.*
