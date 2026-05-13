@@ -1,5 +1,7 @@
 package com.credito.common.security;
 
+import com.credito.common.security.jwt.CreditoJwtAudienceValidator;
+import com.credito.common.security.jwt.CreditoJwtAuthenticationConverter;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;

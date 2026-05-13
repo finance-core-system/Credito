@@ -1,4 +1,4 @@
-package com.credito.common.security;
+package com.credito.common.security.service;
 
 import java.util.List;
 
