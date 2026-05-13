@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class LengthPrefixedFrameCodecTest {
@@ -39,6 +40,10 @@ class LengthPrefixedFrameCodecTest {
     void rejectsNonNumericLengthPrefix() {
         LengthPrefixedFrameCodec codec = new LengthPrefixedFrameCodec(4);
 
-        assertThrows(FixedLengthMessageException.class, () -> codec.decode("00A4PING".getBytes(StandardCharsets.UTF_8)));
+        FixedLengthMessageException exception = assertThrows(
+            FixedLengthMessageException.class,
+            () -> codec.decode("00A4PING".getBytes(StandardCharsets.UTF_8)));
+
+        assertInstanceOf(NumberFormatException.class, exception.getCause());
     }
 }

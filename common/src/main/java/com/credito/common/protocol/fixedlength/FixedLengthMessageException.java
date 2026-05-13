@@ -18,4 +18,8 @@ public class FixedLengthMessageException extends RuntimeException {
     public FixedLengthMessageException(String message) {
         super(message);
     }
+
+    public FixedLengthMessageException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

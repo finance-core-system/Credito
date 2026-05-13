@@ -65,7 +65,7 @@ public final class LengthPrefixedFrameCodec {
         try {
             return Integer.parseInt(prefix);
         } catch (NumberFormatException exception) {
-            throw new FixedLengthMessageException("길이 prefix는 숫자여야 합니다.");
+            throw new FixedLengthMessageException("길이 prefix는 숫자여야 합니다.", exception);
         }
     }
 }
