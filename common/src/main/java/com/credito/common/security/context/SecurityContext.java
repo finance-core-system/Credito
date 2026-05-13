@@ -72,6 +72,9 @@ public record SecurityContext(
     }
 
     public boolean hasAuthority(String authority) {
+        if (authority == null || authority.isBlank()) {
+            return false;
+        }
         return authorities.contains(authority);
     }
 
