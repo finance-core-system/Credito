@@ -100,7 +100,12 @@ public class TraceIdFilter extends OncePerRequestFilter {
 
         @Override
         public Enumeration<String> getHeaderNames() {
-            List<String> headerNames = Collections.list(super.getHeaderNames());
+            Enumeration<String> originalHeaderNames = super.getHeaderNames();
+            if (originalHeaderNames == null) {
+                return Collections.enumeration(List.of(TRACE_ID_HEADER));
+            }
+
+            List<String> headerNames = Collections.list(originalHeaderNames);
             boolean hasTraceIdHeader = headerNames.stream()
                 .anyMatch(name -> TRACE_ID_HEADER.equalsIgnoreCase(name));
             if (!hasTraceIdHeader) {

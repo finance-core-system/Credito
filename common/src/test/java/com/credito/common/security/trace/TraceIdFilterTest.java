@@ -9,6 +9,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -78,5 +80,24 @@ class TraceIdFilterTest {
         } finally {
             MDC.remove(TraceIdFilter.MDC_TRACE_ID_KEY);
         }
+    }
+
+    @Test
+    void exposesTraceIdHeaderWhenOriginalHeaderNamesAreUnavailable() throws ServletException, IOException {
+        MockHttpServletRequest request = new MockHttpServletRequest() {
+            @Override
+            public Enumeration<String> getHeaderNames() {
+                return null;
+            }
+        };
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        AtomicReference<Enumeration<String>> forwardedHeaderNames = new AtomicReference<>();
+
+        new TraceIdFilter().doFilter(request, response, (servletRequest, servletResponse) ->
+            forwardedHeaderNames.set(((jakarta.servlet.http.HttpServletRequest) servletRequest).getHeaderNames()));
+
+        assertEquals(
+            TraceIdFilter.TRACE_ID_HEADER,
+            Collections.list(forwardedHeaderNames.get()).get(0));
     }
 }
