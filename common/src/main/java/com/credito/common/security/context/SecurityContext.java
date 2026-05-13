@@ -46,7 +46,7 @@ public record SecurityContext(
         String serviceName,
         Collection<String> authorities
     ) {
-        return new SecurityContext(principalId, principalName, serviceName, Set.copyOf(authorities), true, Map.of());
+        return new SecurityContext(principalId, principalName, serviceName, immutableSortedSet(authorities), true, Map.of());
     }
 
     public static SecurityContext from(Authentication authentication) {

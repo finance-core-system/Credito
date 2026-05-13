@@ -30,4 +30,12 @@ class SecurityContextTest {
         assertFalse(context.authenticated());
         assertFalse(context.hasRole("ADMIN"));
     }
+
+    @Test
+    void createsContextWithEmptyAuthoritiesWhenAuthoritiesAreNull() {
+        SecurityContext context = SecurityContext.of("principal-1", "principal", "account-service", null);
+
+        assertTrue(context.authenticated());
+        assertTrue(context.authorities().isEmpty());
+    }
 }
