@@ -88,7 +88,9 @@ public record SecurityContext(
         if (scope == null || scope.isBlank()) {
             return false;
         }
-        return hasAuthority("SCOPE_" + scope);
+        String authority = scope.startsWith("SCOPE_") ? scope : "SCOPE_" + scope;
+
+        return hasAuthority(authority);
     }
 
     private static Set<String> immutableSortedSet(Collection<String> values) {

@@ -24,6 +24,7 @@ class SecurityContextTest {
         assertTrue(context.hasAuthority("ROLE_ADMIN"));
         assertTrue(context.hasRole("ADMIN"));
         assertTrue(context.hasScope("accounts.read"));
+        assertTrue(context.hasScope("SCOPE_accounts.read"));
         assertFalse(context.hasScope("accounts.write"));
     }
 
