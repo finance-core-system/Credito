@@ -7,6 +7,20 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Fixed-length 전문 body의 wire format을 정의하는 스펙입니다.
+ *
+ * <p>전문에 사용할 charset과 필드 목록을 하나의 계약으로 묶고,
+ * 전체 body byte 길이를 계산합니다.</p>
+ *
+ * <p>주요 책임</p>
+ * <ul>
+ *     <li>전문 charset 정의</li>
+ *     <li>전문 필드 순서 정의</li>
+ *     <li>필드명 중복 검증</li>
+ *     <li>전체 전문 byte 길이 계산</li>
+ * </ul>
+ */
 public record FixedLengthMessageSpec(
     Charset charset,
     List<FixedLengthFieldSpec> fields

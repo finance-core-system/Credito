@@ -5,6 +5,20 @@ import java.util.Objects;
 
 import com.credito.common.security.context.SecurityContext;
 
+/**
+ * 서비스 로직에서 인증 주체의 권한 보유 여부를 확인하는 helper 클래스입니다.
+ *
+ * <p>{@link SecurityContext}에 담긴 authority, scope, role 정보를 조회하고,
+ * 필수 권한이 없을 때 예외를 던지는 메서드를 제공합니다.</p>
+ *
+ * <p>주요 책임</p>
+ * <ul>
+ *     <li>단일 authority 보유 여부 확인</li>
+ *     <li>복수 authority 중 하나 이상 보유 여부 확인</li>
+ *     <li>scope와 role 보유 여부 확인</li>
+ *     <li>필수 authority 또는 scope 누락 시 예외 발생</li>
+ * </ul>
+ */
 public final class ServicePermissionChecker {
 
     private ServicePermissionChecker() {

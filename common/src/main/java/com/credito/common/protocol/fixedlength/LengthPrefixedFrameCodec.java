@@ -4,6 +4,20 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * Payload 앞에 ASCII length prefix를 붙이거나 제거하는 frame codec입니다.
+ *
+ * <p>Fixed-length 전문 body를 TCP 등 stream 기반 전송에서 구분할 수 있도록
+ * 고정 자릿수 길이 prefix를 추가하고, 수신 frame의 길이 일치 여부를 검증합니다.</p>
+ *
+ * <p>주요 책임</p>
+ * <ul>
+ *     <li>payload byte 길이를 ASCII prefix로 인코딩</li>
+ *     <li>prefix와 payload를 하나의 frame으로 결합</li>
+ *     <li>수신 frame의 prefix 숫자 검증</li>
+ *     <li>prefix 길이와 실제 payload 길이 일치 검증</li>
+ * </ul>
+ */
 public final class LengthPrefixedFrameCodec {
 
     private final int prefixLength;

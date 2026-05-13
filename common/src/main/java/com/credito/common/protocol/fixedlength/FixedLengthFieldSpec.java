@@ -3,6 +3,20 @@ package com.credito.common.protocol.fixedlength;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
+/**
+ * Fixed-length 전문 body를 구성하는 단일 필드의 스펙입니다.
+ *
+ * <p>필드 이름, byte 길이, 정렬 방식, padding 방식을 보관하고,
+ * 해당 스펙에 맞춰 필드 값을 인코딩하거나 디코딩합니다.</p>
+ *
+ * <p>주요 책임</p>
+ * <ul>
+ *     <li>필드 이름과 byte 길이 정의</li>
+ *     <li>문자/숫자 필드 기본 스펙 생성</li>
+ *     <li>필드 값 byte 길이 검증</li>
+ *     <li>필드 단위 인코딩 및 디코딩</li>
+ * </ul>
+ */
 public record FixedLengthFieldSpec(
     String name,
     int length,

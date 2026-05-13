@@ -12,6 +12,19 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * mTLS 구성과 점검에 필요한 인증서 자료를 파일에서 로딩하는 유틸리티 클래스입니다.
+ *
+ * <p>서비스별 keystore 파일을 {@link KeyStore}로 읽거나, CA bundle 같은 인증서 파일을
+ * X.509 certificate 목록으로 변환합니다.</p>
+ *
+ * <p>주요 책임</p>
+ * <ul>
+ *     <li>KeyStore 파일 로딩</li>
+ *     <li>X.509 certificate 파일 로딩</li>
+ *     <li>인증서 로딩 실패 예외 통일</li>
+ * </ul>
+ */
 public final class MtlsCertificateLoader {
 
     private MtlsCertificateLoader() {

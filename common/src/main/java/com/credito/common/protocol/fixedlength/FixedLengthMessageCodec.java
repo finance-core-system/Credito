@@ -5,6 +5,20 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Fixed-length 전문 body를 byte 배열로 인코딩하고 디코딩하는 codec입니다.
+ *
+ * <p>{@link FixedLengthMessageSpec}에 정의된 필드 순서와 길이에 따라 값을 이어 붙이고,
+ * 수신한 byte 배열을 다시 필드별 문자열 값으로 분해합니다.</p>
+ *
+ * <p>주요 책임</p>
+ * <ul>
+ *     <li>필드 스펙 순서에 따른 전문 body 인코딩</li>
+ *     <li>전체 전문 길이 검증</li>
+ *     <li>전문 body를 필드별 값으로 디코딩</li>
+ *     <li>padding을 제거하지 않은 원문 필드 값 반환</li>
+ * </ul>
+ */
 public final class FixedLengthMessageCodec {
 
     private final FixedLengthMessageSpec spec;

@@ -6,6 +6,20 @@ import java.util.Set;
 
 import org.springframework.security.oauth2.jwt.Jwt;
 
+/**
+ * 서비스 간 호출에 사용되는 JWT의 발급자, 대상, 호출 client를 검증하는 클래스입니다.
+ *
+ * <p>토큰의 issuer, audience, client id가 호출 대상 서비스에서 허용한 목록에 포함되는지 확인하고,
+ * 검증 결과와 실패 사유를 값 객체로 반환합니다.</p>
+ *
+ * <p>주요 책임</p>
+ * <ul>
+ *     <li>JWT issuer 허용 여부 검증</li>
+ *     <li>JWT audience 허용 여부 검증</li>
+ *     <li>azp 또는 client_id claim 허용 여부 검증</li>
+ *     <li>서비스 토큰 검증 결과 반환</li>
+ * </ul>
+ */
 public final class ServiceTokenValidator {
 
     private ServiceTokenValidator() {
@@ -50,6 +64,18 @@ public final class ServiceTokenValidator {
         return value != null && values != null && values.contains(value);
     }
 
+    /**
+     * 서비스 토큰 검증 결과를 표현하는 값 객체입니다.
+     *
+     * <p>검증 성공 여부와 함께 검증된 issuer, client id, audience 목록 또는 실패 사유를 반환합니다.</p>
+     *
+     * <p>주요 책임</p>
+     * <ul>
+     *     <li>서비스 토큰 검증 성공 여부 보관</li>
+     *     <li>검증된 issuer, client id, audience 보관</li>
+     *     <li>검증 실패 사유 보관</li>
+     * </ul>
+     */
     public record ServiceTokenValidationResult(
         boolean valid,
         String issuer,

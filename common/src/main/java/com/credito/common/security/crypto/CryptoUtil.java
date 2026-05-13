@@ -10,6 +10,20 @@ import java.util.HexFormat;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+/**
+ * 서비스 전반에서 반복되는 기본 crypto 연산을 제공하는 유틸리티 클래스입니다.
+ *
+ * <p>JDK 표준 API를 사용해 SHA-256 hash, HMAC-SHA256, 보안 난수 생성,
+ * constant-time 문자열 비교를 수행합니다.</p>
+ *
+ * <p>주요 책임</p>
+ * <ul>
+ *     <li>SHA-256 hex digest 생성</li>
+ *     <li>HMAC-SHA256 Base64 signature 생성</li>
+ *     <li>보안 난수 byte 배열 생성</li>
+ *     <li>constant-time 문자열 비교</li>
+ * </ul>
+ */
 public final class CryptoUtil {
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
