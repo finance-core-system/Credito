@@ -49,6 +49,16 @@ class FixedLengthMessageCodecTest {
     }
 
     @Test
+    void rejectsMissingFieldValue() {
+        FixedLengthMessageCodec codec = new FixedLengthMessageCodec(spec());
+
+        assertThrows(FixedLengthMessageException.class, () -> codec.encode(Map.of(
+            "messageType", "0200",
+            "serviceCode", "ACCT",
+            "amount", "1000")));
+    }
+
+    @Test
     void rejectsMessageWithUnexpectedLength() {
         FixedLengthMessageCodec codec = new FixedLengthMessageCodec(spec());
 

@@ -185,7 +185,8 @@ byte[] body = codec.encode(Map.of(
 동작:
 
 - spec의 field 순서대로 값을 읽는다.
-- map에 없는 필드는 null로 읽히며 빈 값으로 padding된다.
+- map에 없는 필드는 누락으로 보고 `FixedLengthMessageException`을 던진다.
+- 명시적으로 null 값이 들어온 필드는 빈 값으로 padding된다.
 - 각 field spec이 값을 bytes로 encode한다.
 - 결과 bytes를 순서대로 이어 붙인다.
 

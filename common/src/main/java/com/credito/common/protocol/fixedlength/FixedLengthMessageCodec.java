@@ -32,6 +32,9 @@ public final class FixedLengthMessageCodec {
 
         ByteArrayOutputStream output = new ByteArrayOutputStream(spec.totalLength());
         for (FixedLengthFieldSpec field : spec.fields()) {
+            if (!values.containsKey(field.name())) {
+                throw new FixedLengthMessageException("전문 필드 값이 누락되었습니다: " + field.name());
+            }
             Object value = values.get(field.name());
             output.writeBytes(field.encode(value == null ? null : value.toString(), spec.charset()));
         }
