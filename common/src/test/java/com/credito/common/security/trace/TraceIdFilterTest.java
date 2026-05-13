@@ -8,6 +8,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -19,23 +20,31 @@ class TraceIdFilterTest {
     void propagatesIncomingTraceId() throws ServletException, IOException {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
+        AtomicReference<String> forwardedTraceId = new AtomicReference<>();
         request.addHeader(TraceIdFilter.TRACE_ID_HEADER, "trace-123");
 
-        new TraceIdFilter().doFilter(request, response, new MockFilterChain());
+        new TraceIdFilter().doFilter(request, response, (servletRequest, servletResponse) ->
+            forwardedTraceId.set(((jakarta.servlet.http.HttpServletRequest) servletRequest)
+                .getHeader(TraceIdFilter.TRACE_ID_HEADER)));
 
         assertEquals("trace-123", request.getAttribute(TraceIdFilter.REQUEST_ATTRIBUTE));
         assertEquals("trace-123", response.getHeader(TraceIdFilter.TRACE_ID_HEADER));
+        assertEquals("trace-123", forwardedTraceId.get());
     }
 
     @Test
     void createsTraceIdWhenHeaderIsMissing() throws ServletException, IOException {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
+        AtomicReference<String> forwardedTraceId = new AtomicReference<>();
 
-        new TraceIdFilter().doFilter(request, response, new MockFilterChain());
+        new TraceIdFilter().doFilter(request, response, (servletRequest, servletResponse) ->
+            forwardedTraceId.set(((jakarta.servlet.http.HttpServletRequest) servletRequest)
+                .getHeader(TraceIdFilter.TRACE_ID_HEADER)));
 
         assertNotNull(request.getAttribute(TraceIdFilter.REQUEST_ATTRIBUTE));
         assertNotNull(response.getHeader(TraceIdFilter.TRACE_ID_HEADER));
+        assertEquals(response.getHeader(TraceIdFilter.TRACE_ID_HEADER), forwardedTraceId.get());
     }
 
     @Test
