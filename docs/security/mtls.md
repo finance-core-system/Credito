@@ -24,6 +24,9 @@ server -> client certificate 검증
 현재 구현 위치:
 
 - `com.credito.common.security.mtls.MtlsCertificateLoader`
+- `infra/mtls/generate-dev-certs.sh`
+- 각 서비스 `application.yml`의 `server.ssl.*` 설정
+- `docker-compose.yml`의 `/etc/credito/mtls` 마운트와 TLS 환경변수
 
 ## Alternatives
 
@@ -43,6 +46,8 @@ server -> client certificate 검증
 
 현재 구현은 세 번째 선택지다.
 
+dev/compose 인증서 발급은 운영 PKI와 분리된 자체 CA 방식으로 둔다. 운영용 인증서 발급과 rotation은 이 문서와 현재 구현 범위에 포함하지 않는다.
+
 ## Decision
 
 `MtlsCertificateLoader`는 두 가지 일만 한다.
@@ -50,12 +55,23 @@ server -> client certificate 검증
 - keystore 파일을 `KeyStore`로 로딩한다.
 - 인증서 파일을 `List<X509Certificate>`로 로딩한다.
 
+dev/compose 환경은 다음 방식으로 준비한다.
+
+- 자체 root CA를 생성한다.
+- 서비스별 인증서를 생성한다.
+- 서비스별 인증서는 serverAuth와 clientAuth 용도를 모두 가진다.
+- 서비스별 인증서와 개인키를 PKCS12 keystore로 묶는다.
+- root CA를 PKCS12 truststore로 가져온다.
+- Spring Boot `server.ssl.*` 설정은 환경변수로 켜고 끌 수 있게 둔다.
+
 이렇게 한 이유는 다음과 같다.
 
 - mTLS 구성 방식은 runtime, container, Spring 설정에 따라 달라질 수 있다.
 - common이 HTTP client/server bean 생성까지 맡으면 서비스별 설정 자유도가 줄어든다.
 - 인증서 로딩은 테스트와 운영 점검에서 공통으로 재사용할 수 있다.
 - 실패 시 예외 타입을 `IllegalStateException`으로 통일할 수 있다.
+- compose 기본 실행은 `MTLS_ENABLED=false`로 유지해 기존 HTTP healthcheck와 로컬 테스트를 깨지 않는다.
+- mTLS 검증이 필요할 때만 `MTLS_ENABLED=true`, `MTLS_CLIENT_AUTH=need`, `INTERNAL_SERVICE_SCHEME=https`를 명시한다.
 
 ## Implementation
 
@@ -103,6 +119,118 @@ List<X509Certificate> certificates =
 - 여러 인증서가 들어 있는 bundle도 collection으로 처리한다.
 - X.509 certificate가 아닌 값은 결과에서 제외된다.
 
+### Dev Certificate Bootstrap
+
+dev/compose 인증서 생성 스크립트는 다음 위치에 있다.
+
+```text
+infra/mtls/generate-dev-certs.sh
+```
+
+실행:
+
+```bash
+./infra/mtls/generate-dev-certs.sh
+```
+
+기본 password:
+
+```text
+changeit
+```
+
+환경변수로 password와 유효기간을 바꿀 수 있다.
+
+```bash
+MTLS_STORE_PASSWORD=local-secret MTLS_CERT_VALID_DAYS=30 ./infra/mtls/generate-dev-certs.sh
+```
+
+생성 결과:
+
+```text
+infra/mtls/generated
+├── credito-dev-ca.crt
+├── credito-dev-ca.key
+├── truststore.p12
+├── gateway-service/gateway-service.p12
+├── customer-service/customer-service.p12
+├── account-service/account-service.p12
+├── lending-service/lending-service.p12
+└── batch-service/batch-service.p12
+```
+
+`infra/mtls/generated/`는 Git 추적 대상에서 제외한다.
+
+### Compose File Layout
+
+compose 컨테이너는 생성된 인증서 디렉터리를 다음 경로에 read-only로 마운트한다.
+
+```text
+/etc/credito/mtls
+```
+
+각 서비스의 keystore 경로:
+
+```text
+/etc/credito/mtls/gateway-service/gateway-service.p12
+/etc/credito/mtls/customer-service/customer-service.p12
+/etc/credito/mtls/account-service/account-service.p12
+/etc/credito/mtls/lending-service/lending-service.p12
+/etc/credito/mtls/batch-service/batch-service.p12
+```
+
+공통 truststore 경로:
+
+```text
+/etc/credito/mtls/truststore.p12
+```
+
+### Spring SSL Environment
+
+각 Spring 서비스는 다음 환경변수로 inbound HTTPS와 client certificate 요구 여부를 설정한다.
+
+```text
+MTLS_ENABLED
+MTLS_KEY_STORE
+MTLS_KEY_STORE_PASSWORD
+MTLS_KEY_STORE_TYPE
+MTLS_TRUST_STORE
+MTLS_TRUST_STORE_PASSWORD
+MTLS_TRUST_STORE_TYPE
+MTLS_CLIENT_AUTH
+```
+
+기본값:
+
+```text
+MTLS_ENABLED=false
+MTLS_KEY_STORE_TYPE=PKCS12
+MTLS_TRUST_STORE_TYPE=PKCS12
+MTLS_CLIENT_AUTH=none
+```
+
+mTLS handshake를 확인하려면 dev 인증서를 생성한 뒤 다음 값을 사용한다.
+
+```bash
+MTLS_ENABLED=true
+MTLS_CLIENT_AUTH=need
+MTLS_STORE_PASSWORD=changeit
+INTERNAL_SERVICE_SCHEME=https
+```
+
+### Outbound Client Certificate
+
+compose는 각 Java 프로세스에 `JAVA_TOOL_OPTIONS`로 JVM 기본 keyStore/trustStore도 지정한다.
+
+```text
+javax.net.ssl.keyStore
+javax.net.ssl.keyStorePassword
+javax.net.ssl.trustStore
+javax.net.ssl.trustStorePassword
+```
+
+현재 프로젝트에는 내부 서비스 호출 전용 HTTP client bean이 아직 없다. 따라서 이 설정은 JVM 기본 SSL context를 사용하는 client가 생겼을 때 같은 인증서 파일을 참조하도록 준비하는 단계다.
+
 ## Consequences
 
 좋아진 점:
@@ -110,13 +238,16 @@ List<X509Certificate> certificates =
 - 인증서와 keystore 로딩 코드가 서비스마다 흩어지지 않는다.
 - 실패 메시지가 `KeyStore 로딩에 실패했습니다`, `X.509 인증서 로딩에 실패했습니다` 형태로 통일된다.
 - 테스트에서 인증서 로딩 실패 케이스를 common 기준으로 검증할 수 있다.
+- dev/compose 자체 CA와 서비스별 인증서 생성 방식이 스크립트로 재현 가능해졌다.
+- 각 Spring 서비스가 keystore/truststore를 환경변수로 참조할 수 있다.
+- Gateway route는 `INTERNAL_SERVICE_SCHEME`으로 HTTP/HTTPS 전환이 가능하다.
 
 남아 있는 점:
 
-- mTLS 연결을 자동으로 구성하지 않는다.
+- compose 기본값은 기존 개발 흐름을 위해 mTLS를 강제하지 않는다.
 - hostname 검증, SAN 검증, certificate chain 정책은 이 클래스에 없다.
 - 인증서 만료 검사 API는 아직 없다.
-- keystore password 로딩 방식은 구현하지 않았다.
-- Spring Boot SSL bundle과 직접 연결하는 설정 클래스는 없다.
+- 운영용 PKI 연동과 인증서 rotation은 구현하지 않았다.
+- 내부 서비스 호출 전용 HTTP client bean은 아직 없다.
 
-현재 구현의 범위는 “mTLS에 필요한 인증서 자료를 읽는 것”까지다.
+현재 구현의 범위는 “dev/compose에서 mTLS 인증서와 store 파일을 재현 가능하게 만들고, Spring 서비스가 해당 파일을 참조할 수 있게 준비하는 것”까지다.
