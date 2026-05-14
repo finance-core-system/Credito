@@ -70,8 +70,8 @@ dev/compose 환경은 다음 방식으로 준비한다.
 - common이 HTTP client/server bean 생성까지 맡으면 서비스별 설정 자유도가 줄어든다.
 - 인증서 로딩은 테스트와 운영 점검에서 공통으로 재사용할 수 있다.
 - 실패 시 예외 타입을 `IllegalStateException`으로 통일할 수 있다.
-- compose와 테스트에서 `MTLS_ENABLED=false`를 명시 주입해 기존 HTTP healthcheck와 로컬 테스트를 유지한다.
-- mTLS 검증이 필요할 때만 `MTLS_ENABLED=true`, `MTLS_CLIENT_AUTH=need`, `INTERNAL_SERVICE_SCHEME=https`를 명시한다.
+- 기본 compose 실행은 `MTLS_ENABLED=true`, `MTLS_CLIENT_AUTH=need`, `INTERNAL_SERVICE_SCHEME=https`로 동작한다.
+- 내부 서비스 간 HTTP 우회 compose는 별도로 두지 않는다.
 
 ## Implementation
 
@@ -163,7 +163,7 @@ infra/mtls/generated
 
 ### Compose File Layout
 
-compose 컨테이너는 서비스 실행에 필요한 파일만 read-only로 마운트한다. 모든 서비스는 공통 truststore 파일을 받고, 각 서비스는 자기 서비스의 PKCS12 keystore 파일만 받는다.
+`docker-compose.yml`은 서비스 실행에 필요한 파일만 read-only로 마운트한다. 모든 서비스는 공통 truststore 파일을 받고, 각 서비스는 자기 서비스의 PKCS12 keystore 파일만 받는다.
 
 ```text
 ./infra/mtls/generated/truststore.p12
@@ -203,34 +203,29 @@ MTLS_TRUST_STORE_TYPE
 MTLS_CLIENT_AUTH
 ```
 
-로컬 HTTP 실행에 사용하는 명시 값:
+기본 compose 실행에 사용하는 값:
 
 ```text
-MTLS_ENABLED=false
+MTLS_ENABLED=true
 MTLS_KEY_STORE=/etc/credito/mtls/{service}/{service}.p12
 MTLS_KEY_STORE_PASSWORD=changeit
 MTLS_KEY_STORE_TYPE=PKCS12
 MTLS_TRUST_STORE=/etc/credito/mtls/truststore.p12
 MTLS_TRUST_STORE_PASSWORD=changeit
 MTLS_TRUST_STORE_TYPE=PKCS12
-MTLS_CLIENT_AUTH=none
-INTERNAL_SERVICE_SCHEME=http
+MTLS_CLIENT_AUTH=need
+INTERNAL_SERVICE_SCHEME=https
 ```
 
-mTLS handshake를 확인하려면 dev 인증서를 생성한 뒤 다음 값을 사용한다.
+mTLS handshake를 확인하려면 dev 인증서를 생성한 뒤 기본 compose를 실행한다.
 
 ```bash
-MTLS_ENABLED=true
-MTLS_CLIENT_AUTH=need
-MTLS_STORE_PASSWORD=changeit
-INTERNAL_SERVICE_SCHEME=https
+docker compose up
 ```
 
 ### Outbound Client Certificate
 
-기본 `docker-compose.yml`은 `JAVA_TOOL_OPTIONS`로 JVM trustStore를 지정하지 않는다. 이 상태에서는 JVM이 기본 `cacerts` 신뢰 체인을 사용하므로, 공개 CA 기반 외부 HTTPS 호출 경로를 유지한다.
-
-mTLS outbound client certificate와 내부 CA trustStore가 필요한 실행은 `docker-compose.mtls.yml` overlay를 함께 사용한다. overlay는 각 Java 프로세스에 다음 JVM SSL system property를 주입한다.
+`docker-compose.yml`은 각 Java 프로세스에 다음 JVM SSL system property를 주입한다.
 
 ```text
 javax.net.ssl.keyStore
@@ -240,11 +235,7 @@ javax.net.ssl.trustStorePassword
 ```
 
 ```bash
-MTLS_ENABLED=true \
-MTLS_CLIENT_AUTH=need \
-MTLS_STORE_PASSWORD=changeit \
-INTERNAL_SERVICE_SCHEME=https \
-docker compose -f docker-compose.yml -f docker-compose.mtls.yml up
+docker compose up
 ```
 
 현재 프로젝트에는 내부 서비스 호출 전용 HTTP client bean이 아직 없다. 따라서 이 설정은 JVM 기본 SSL context를 사용하는 client가 생겼을 때 같은 인증서 파일을 참조하도록 준비하는 단계다.
@@ -259,11 +250,12 @@ docker compose -f docker-compose.yml -f docker-compose.mtls.yml up
 - dev/compose 자체 CA와 서비스별 인증서 생성 방식이 스크립트로 재현 가능해졌다.
 - 각 Spring 서비스가 keystore/truststore를 환경변수로 참조할 수 있다.
 - Gateway route는 `INTERNAL_SERVICE_SCHEME`으로 HTTP/HTTPS 전환이 가능하다.
-- mTLS overlay를 붙이지 않은 기본 compose 실행은 JVM 기본 `cacerts`를 유지한다.
+- 기본 compose 실행에서 내부 서비스 간 통신은 HTTPS/mTLS를 사용한다.
+- 런타임 컨테이너는 CA 개인키가 아니라 서비스별 keystore와 공통 truststore만 받는다.
 
 남아 있는 점:
 
-- compose 실행 시 mTLS 관련 환경변수는 명시적으로 주입해야 한다.
+- 기본 JVM trustStore를 내부 CA truststore로 지정하므로 공개 CA 기반 외부 HTTPS 호출이 필요한 경우 별도 HTTP client SSL context 또는 통합 truststore 구성이 필요하다.
 - hostname 검증, SAN 검증, certificate chain 정책은 이 클래스에 없다.
 - 인증서 만료 검사 API는 아직 없다.
 - 운영용 PKI 연동과 인증서 rotation은 구현하지 않았다.
