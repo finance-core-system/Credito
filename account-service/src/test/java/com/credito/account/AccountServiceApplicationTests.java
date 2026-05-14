@@ -42,7 +42,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {
-        "SERVER_PORT=0"
+        "SERVER_PORT=0",
+        "MTLS_ENABLED=false",
+        "MTLS_KEY_STORE=",
+        "MTLS_KEY_STORE_PASSWORD=",
+        "MTLS_KEY_STORE_TYPE=PKCS12",
+        "MTLS_TRUST_STORE=",
+        "MTLS_TRUST_STORE_PASSWORD=",
+        "MTLS_TRUST_STORE_TYPE=PKCS12",
+        "MTLS_CLIENT_AUTH=none"
     })
 class AccountServiceApplicationTests {
 

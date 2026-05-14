@@ -70,7 +70,7 @@ dev/compose 환경은 다음 방식으로 준비한다.
 - common이 HTTP client/server bean 생성까지 맡으면 서비스별 설정 자유도가 줄어든다.
 - 인증서 로딩은 테스트와 운영 점검에서 공통으로 재사용할 수 있다.
 - 실패 시 예외 타입을 `IllegalStateException`으로 통일할 수 있다.
-- compose 기본 실행은 `MTLS_ENABLED=false`로 유지해 기존 HTTP healthcheck와 로컬 테스트를 깨지 않는다.
+- compose와 테스트에서 `MTLS_ENABLED=false`를 명시 주입해 기존 HTTP healthcheck와 로컬 테스트를 유지한다.
 - mTLS 검증이 필요할 때만 `MTLS_ENABLED=true`, `MTLS_CLIENT_AUTH=need`, `INTERNAL_SERVICE_SCHEME=https`를 명시한다.
 
 ## Implementation
@@ -200,13 +200,18 @@ MTLS_TRUST_STORE_TYPE
 MTLS_CLIENT_AUTH
 ```
 
-기본값:
+로컬 HTTP 실행에 사용하는 명시 값:
 
 ```text
 MTLS_ENABLED=false
+MTLS_KEY_STORE=/etc/credito/mtls/{service}/{service}.p12
+MTLS_KEY_STORE_PASSWORD=changeit
 MTLS_KEY_STORE_TYPE=PKCS12
+MTLS_TRUST_STORE=/etc/credito/mtls/truststore.p12
+MTLS_TRUST_STORE_PASSWORD=changeit
 MTLS_TRUST_STORE_TYPE=PKCS12
 MTLS_CLIENT_AUTH=none
+INTERNAL_SERVICE_SCHEME=http
 ```
 
 mTLS handshake를 확인하려면 dev 인증서를 생성한 뒤 다음 값을 사용한다.
@@ -244,7 +249,7 @@ javax.net.ssl.trustStorePassword
 
 남아 있는 점:
 
-- compose 기본값은 기존 개발 흐름을 위해 mTLS를 강제하지 않는다.
+- compose 실행 시 mTLS 관련 환경변수는 명시적으로 주입해야 한다.
 - hostname 검증, SAN 검증, certificate chain 정책은 이 클래스에 없다.
 - 인증서 만료 검사 API는 아직 없다.
 - 운영용 PKI 연동과 인증서 rotation은 구현하지 않았다.

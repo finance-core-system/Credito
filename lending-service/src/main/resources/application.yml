@@ -21,14 +21,14 @@ credito:
 server:
   port: ${SERVER_PORT}
   ssl:
-    enabled: ${MTLS_ENABLED:false}
-    key-store: ${MTLS_KEY_STORE:}
-    key-store-password: ${MTLS_KEY_STORE_PASSWORD:}
-    key-store-type: ${MTLS_KEY_STORE_TYPE:PKCS12}
-    trust-store: ${MTLS_TRUST_STORE:}
-    trust-store-password: ${MTLS_TRUST_STORE_PASSWORD:}
-    trust-store-type: ${MTLS_TRUST_STORE_TYPE:PKCS12}
-    client-auth: ${MTLS_CLIENT_AUTH:none}
+    enabled: ${MTLS_ENABLED}
+    key-store: ${MTLS_KEY_STORE}
+    key-store-password: ${MTLS_KEY_STORE_PASSWORD}
+    key-store-type: ${MTLS_KEY_STORE_TYPE}
+    trust-store: ${MTLS_TRUST_STORE}
+    trust-store-password: ${MTLS_TRUST_STORE_PASSWORD}
+    trust-store-type: ${MTLS_TRUST_STORE_TYPE}
+    client-auth: ${MTLS_CLIENT_AUTH}
 
 management:
   endpoints:
