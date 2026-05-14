@@ -10,5 +10,6 @@ out/
 
 .DS_Store
 /docs/issues/
+/infra/mtls/generated/
 .env
 .env.*
