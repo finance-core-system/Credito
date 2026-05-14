@@ -8,6 +8,7 @@ credito:
       audiences:
         - credito-api
         - credito-admin-api
+        - credito-internal-api
       issuers:
         - issuer-uri: ${CUSTOMER_REALM_ISSUER_URI}
           jwk-set-uri: ${CUSTOMER_REALM_JWK_SET_URI}
@@ -17,6 +18,24 @@ credito:
           jwk-set-uri: ${ADMIN_REALM_JWK_SET_URI}
         - issuer-uri: ${ADMIN_REALM_INTERNAL_ISSUER_URI}
           jwk-set-uri: ${ADMIN_REALM_INTERNAL_JWK_SET_URI}
+        - issuer-uri: ${SYSTEM_REALM_ISSUER_URI}
+          jwk-set-uri: ${SYSTEM_REALM_JWK_SET_URI}
+        - issuer-uri: ${SYSTEM_REALM_INTERNAL_ISSUER_URI}
+          jwk-set-uri: ${SYSTEM_REALM_INTERNAL_JWK_SET_URI}
+      service-token:
+        allowed-issuers:
+          - ${SYSTEM_REALM_ISSUER_URI}
+          - ${SYSTEM_REALM_INTERNAL_ISSUER_URI}
+        allowed-audiences:
+          - credito-internal-api
+        rules:
+          - path-pattern: /api/accounts/**
+            allowed-client-ids:
+              - gateway-service
+              - lending-service
+              - batch-service
+            required-scopes:
+              - accounts.read
 
 server:
   port: ${SERVER_PORT}

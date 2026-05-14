@@ -18,7 +18,8 @@ class ServiceTokenValidatorTest {
             jwt("https://auth.credito.local/realms/credito", List.of("account-service"), "gateway-service"),
             List.of("https://auth.credito.local/realms/credito"),
             List.of("account-service"),
-            List.of("gateway-service"));
+            List.of("gateway-service"),
+            List.of("accounts.read"));
 
         assertTrue(result.valid());
     }
@@ -29,7 +30,8 @@ class ServiceTokenValidatorTest {
             jwt("https://auth.credito.local/realms/credito", List.of("account-service"), "unknown-service"),
             List.of("https://auth.credito.local/realms/credito"),
             List.of("account-service"),
-            List.of("gateway-service"));
+            List.of("gateway-service"),
+            List.of("accounts.read"));
 
         assertFalse(result.valid());
     }
@@ -40,7 +42,8 @@ class ServiceTokenValidatorTest {
             jwtWithoutAudience("https://auth.credito.local/realms/credito", "gateway-service"),
             List.of("https://auth.credito.local/realms/credito"),
             List.of("account-service"),
-            List.of("gateway-service"));
+            List.of("gateway-service"),
+            List.of("accounts.read"));
 
         assertFalse(result.valid());
     }
@@ -51,7 +54,32 @@ class ServiceTokenValidatorTest {
             jwt("https://auth.credito.local/realms/credito", List.of(), "gateway-service"),
             List.of("https://auth.credito.local/realms/credito"),
             List.of("account-service"),
-            List.of("gateway-service"));
+            List.of("gateway-service"),
+            List.of("accounts.read"));
+
+        assertFalse(result.valid());
+    }
+
+    @Test
+    void rejectsTokenWithoutRequiredScope() {
+        var result = ServiceTokenValidator.validate(
+            jwt("https://auth.credito.local/realms/credito", List.of("account-service"), "gateway-service"),
+            List.of("https://auth.credito.local/realms/credito"),
+            List.of("account-service"),
+            List.of("gateway-service"),
+            List.of("accounts.write"));
+
+        assertFalse(result.valid());
+    }
+
+    @Test
+    void rejectsExpiredToken() {
+        var result = ServiceTokenValidator.validate(
+            expiredJwt("https://auth.credito.local/realms/credito", List.of("account-service"), "gateway-service"),
+            List.of("https://auth.credito.local/realms/credito"),
+            List.of("account-service"),
+            List.of("gateway-service"),
+            List.of("accounts.read"));
 
         assertFalse(result.valid());
     }
@@ -65,7 +93,8 @@ class ServiceTokenValidatorTest {
             Map.of(
                 "iss", issuer,
                 "aud", audiences,
-                "azp", clientId));
+                "azp", clientId,
+                "scope", "accounts.read customers.read"));
     }
 
     private static Jwt jwtWithoutAudience(String issuer, String clientId) {
@@ -77,5 +106,18 @@ class ServiceTokenValidatorTest {
             Map.of(
                 "iss", issuer,
                 "azp", clientId));
+    }
+
+    private static Jwt expiredJwt(String issuer, List<String> audiences, String clientId) {
+        return new Jwt(
+            "token",
+            Instant.now().minusSeconds(120),
+            Instant.now().minusSeconds(60),
+            Map.of("alg", "none"),
+            Map.of(
+                "iss", issuer,
+                "aud", audiences,
+                "azp", clientId,
+                "scope", "accounts.read"));
     }
 }

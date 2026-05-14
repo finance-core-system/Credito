@@ -80,6 +80,10 @@ class AccountServiceApplicationTests {
         registry.add("ADMIN_REALM_JWK_SET_URI", () -> JWK_SET_URI);
         registry.add("ADMIN_REALM_INTERNAL_ISSUER_URI", () -> "http://keycloak:8080/realms/admin-realm");
         registry.add("ADMIN_REALM_INTERNAL_JWK_SET_URI", () -> JWK_SET_URI);
+        registry.add("SYSTEM_REALM_ISSUER_URI", () -> "http://localhost:8085/realms/system-realm");
+        registry.add("SYSTEM_REALM_JWK_SET_URI", () -> JWK_SET_URI);
+        registry.add("SYSTEM_REALM_INTERNAL_ISSUER_URI", () -> "http://keycloak:8080/realms/system-realm");
+        registry.add("SYSTEM_REALM_INTERNAL_JWK_SET_URI", () -> JWK_SET_URI);
     }
 
     @AfterAll

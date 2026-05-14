@@ -1,6 +1,8 @@
 package com.credito.common.security.service;
 
 import java.util.Collection;
+import java.time.Instant;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -17,6 +19,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
  *     <li>JWT issuer 허용 여부 검증</li>
  *     <li>JWT audience 허용 여부 검증</li>
  *     <li>azp 또는 client_id claim 허용 여부 검증</li>
+ *     <li>만료 시각과 필수 scope 보유 여부 검증</li>
  *     <li>서비스 토큰 검증 결과 반환</li>
  * </ul>
  */
@@ -29,9 +32,15 @@ public final class ServiceTokenValidator {
         Jwt jwt,
         Collection<String> allowedIssuers,
         Collection<String> allowedAudiences,
-        Collection<String> allowedClientIds
+        Collection<String> allowedClientIds,
+        Collection<String> requiredScopes
     ) {
         Objects.requireNonNull(jwt, "서비스 토큰은 null일 수 없습니다.");
+
+        Instant expiresAt = jwt.getExpiresAt();
+        if (expiresAt == null || !Instant.now().isBefore(expiresAt)) {
+            return ServiceTokenValidationResult.invalid("토큰이 만료되었거나 만료 시각이 없습니다.");
+        }
 
         String issuer = jwt.getIssuer() == null ? null : jwt.getIssuer().toString();
         if (!contains(allowedIssuers, issuer)) {
@@ -54,7 +63,12 @@ public final class ServiceTokenValidator {
             return ServiceTokenValidationResult.invalid("허용되지 않은 client_id입니다.");
         }
 
-        return ServiceTokenValidationResult.valid(issuer, clientId, Set.copyOf(audiences));
+        Set<String> scopes = scopes(jwt);
+        if (!scopes.containsAll(nullSafeSet(requiredScopes))) {
+            return ServiceTokenValidationResult.invalid("필수 scope가 없습니다.");
+        }
+
+        return ServiceTokenValidationResult.valid(issuer, clientId, Set.copyOf(audiences), scopes);
     }
 
     private static String clientId(Jwt jwt) {
@@ -69,6 +83,35 @@ public final class ServiceTokenValidator {
         return value != null && values != null && values.contains(value);
     }
 
+    private static Set<String> scopes(Jwt jwt) {
+        Set<String> scopes = new LinkedHashSet<>();
+        String scope = jwt.getClaimAsString("scope");
+        if (scope != null && !scope.isBlank()) {
+            for (String value : scope.split(" ")) {
+                if (!value.isBlank()) {
+                    scopes.add(value);
+                }
+            }
+        }
+
+        Object scp = jwt.getClaim("scp");
+        if (scp instanceof Collection<?> values) {
+            values.stream()
+                .filter(String.class::isInstance)
+                .map(String.class::cast)
+                .filter(value -> !value.isBlank())
+                .forEach(scopes::add);
+        }
+        return Set.copyOf(scopes);
+    }
+
+    private static Set<String> nullSafeSet(Collection<String> values) {
+        if (values == null || values.isEmpty()) {
+            return Set.of();
+        }
+        return Set.copyOf(values);
+    }
+
     /**
      * 서비스 토큰 검증 결과를 표현하는 값 객체입니다.
      *
@@ -77,7 +120,7 @@ public final class ServiceTokenValidator {
      * <p>주요 책임</p>
      * <ul>
      *     <li>서비스 토큰 검증 성공 여부 보관</li>
-     *     <li>검증된 issuer, client id, audience 보관</li>
+     *     <li>검증된 issuer, client id, audience, scope 보관</li>
      *     <li>검증 실패 사유 보관</li>
      * </ul>
      */
@@ -86,15 +129,21 @@ public final class ServiceTokenValidator {
         String issuer,
         String clientId,
         Set<String> audiences,
+        Set<String> scopes,
         String reason
     ) {
 
-        private static ServiceTokenValidationResult valid(String issuer, String clientId, Set<String> audiences) {
-            return new ServiceTokenValidationResult(true, issuer, clientId, audiences, null);
+        private static ServiceTokenValidationResult valid(
+            String issuer,
+            String clientId,
+            Set<String> audiences,
+            Set<String> scopes
+        ) {
+            return new ServiceTokenValidationResult(true, issuer, clientId, audiences, scopes, null);
         }
 
         private static ServiceTokenValidationResult invalid(String reason) {
-            return new ServiceTokenValidationResult(false, null, null, Set.of(), reason);
+            return new ServiceTokenValidationResult(false, null, null, Set.of(), Set.of(), reason);
         }
     }
 }
