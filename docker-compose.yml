@@ -47,7 +47,8 @@ services:
       MANAGEMENT_PASSWORD: ${MANAGEMENT_PASSWORD:?MANAGEMENT_PASSWORD is required}
       MTLS_KEY_STORE: /etc/credito/mtls/gateway-service/gateway-service.p12
     volumes:
-      - ./infra/mtls/generated:/etc/credito/mtls:ro
+      - ./infra/mtls/generated/truststore.p12:/etc/credito/mtls/truststore.p12:ro
+      - ./infra/mtls/generated/gateway-service/gateway-service.p12:/etc/credito/mtls/gateway-service/gateway-service.p12:ro
     ports:
       - "${GATEWAY_PUBLIC_PORT}:${GATEWAY_SERVER_PORT}"
     networks:
@@ -117,7 +118,8 @@ services:
       SERVER_PORT: ${CUSTOMER_SERVICE_PORT}
       MTLS_KEY_STORE: /etc/credito/mtls/customer-service/customer-service.p12
     volumes:
-      - ./infra/mtls/generated:/etc/credito/mtls:ro
+      - ./infra/mtls/generated/truststore.p12:/etc/credito/mtls/truststore.p12:ro
+      - ./infra/mtls/generated/customer-service/customer-service.p12:/etc/credito/mtls/customer-service/customer-service.p12:ro
     expose:
       - "${CUSTOMER_SERVICE_PORT}"
     networks:
@@ -139,7 +141,8 @@ services:
       SERVER_PORT: ${ACCOUNT_SERVICE_PORT}
       MTLS_KEY_STORE: /etc/credito/mtls/account-service/account-service.p12
     volumes:
-      - ./infra/mtls/generated:/etc/credito/mtls:ro
+      - ./infra/mtls/generated/truststore.p12:/etc/credito/mtls/truststore.p12:ro
+      - ./infra/mtls/generated/account-service/account-service.p12:/etc/credito/mtls/account-service/account-service.p12:ro
     expose:
       - "${ACCOUNT_SERVICE_PORT}"
     networks:
@@ -161,7 +164,8 @@ services:
       SERVER_PORT: ${LENDING_SERVICE_PORT}
       MTLS_KEY_STORE: /etc/credito/mtls/lending-service/lending-service.p12
     volumes:
-      - ./infra/mtls/generated:/etc/credito/mtls:ro
+      - ./infra/mtls/generated/truststore.p12:/etc/credito/mtls/truststore.p12:ro
+      - ./infra/mtls/generated/lending-service/lending-service.p12:/etc/credito/mtls/lending-service/lending-service.p12:ro
     expose:
       - "${LENDING_SERVICE_PORT}"
     networks:
@@ -183,7 +187,8 @@ services:
       SERVER_PORT: ${BATCH_SERVICE_PORT}
       MTLS_KEY_STORE: /etc/credito/mtls/batch-service/batch-service.p12
     volumes:
-      - ./infra/mtls/generated:/etc/credito/mtls:ro
+      - ./infra/mtls/generated/truststore.p12:/etc/credito/mtls/truststore.p12:ro
+      - ./infra/mtls/generated/batch-service/batch-service.p12:/etc/credito/mtls/batch-service/batch-service.p12:ro
     expose:
       - "${BATCH_SERVICE_PORT}"
     networks:

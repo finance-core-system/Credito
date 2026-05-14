@@ -26,7 +26,7 @@ server -> client certificate 검증
 - `com.credito.common.security.mtls.MtlsCertificateLoader`
 - `infra/mtls/generate-dev-certs.sh`
 - 각 서비스 `application.yml`의 `server.ssl.*` 설정
-- `docker-compose.yml`의 `/etc/credito/mtls` 마운트와 TLS 환경변수
+- `docker-compose.yml`의 파일 단위 mTLS store 마운트와 TLS 환경변수
 
 ## Alternatives
 
@@ -159,15 +159,18 @@ infra/mtls/generated
 └── batch-service/batch-service.p12
 ```
 
-`infra/mtls/generated/`는 Git 추적 대상에서 제외한다.
+`infra/mtls/generated/`는 Git 추적 대상에서 제외한다. 이 디렉터리에는 dev CA 개인키도 생성되지만, 런타임 서비스 컨테이너에는 디렉터리 전체를 마운트하지 않는다.
 
 ### Compose File Layout
 
-compose 컨테이너는 생성된 인증서 디렉터리를 다음 경로에 read-only로 마운트한다.
+compose 컨테이너는 서비스 실행에 필요한 파일만 read-only로 마운트한다. 모든 서비스는 공통 truststore 파일을 받고, 각 서비스는 자기 서비스의 PKCS12 keystore 파일만 받는다.
 
 ```text
-/etc/credito/mtls
+./infra/mtls/generated/truststore.p12
+./infra/mtls/generated/{service}/{service}.p12
 ```
+
+`credito-dev-ca.key`, CSR, 개별 PEM key 파일은 런타임 컨테이너에 마운트하지 않는다.
 
 각 서비스의 keystore 경로:
 
