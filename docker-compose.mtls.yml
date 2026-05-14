@@ -1,0 +1,40 @@
+services:
+  gateway-service:
+    environment:
+      JAVA_TOOL_OPTIONS: >-
+        -Djavax.net.ssl.keyStore=/etc/credito/mtls/gateway-service/gateway-service.p12
+        -Djavax.net.ssl.keyStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}
+        -Djavax.net.ssl.trustStore=/etc/credito/mtls/truststore.p12
+        -Djavax.net.ssl.trustStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}
+
+  customer-service:
+    environment:
+      JAVA_TOOL_OPTIONS: >-
+        -Djavax.net.ssl.keyStore=/etc/credito/mtls/customer-service/customer-service.p12
+        -Djavax.net.ssl.keyStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}
+        -Djavax.net.ssl.trustStore=/etc/credito/mtls/truststore.p12
+        -Djavax.net.ssl.trustStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}
+
+  account-service:
+    environment:
+      JAVA_TOOL_OPTIONS: >-
+        -Djavax.net.ssl.keyStore=/etc/credito/mtls/account-service/account-service.p12
+        -Djavax.net.ssl.keyStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}
+        -Djavax.net.ssl.trustStore=/etc/credito/mtls/truststore.p12
+        -Djavax.net.ssl.trustStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}
+
+  lending-service:
+    environment:
+      JAVA_TOOL_OPTIONS: >-
+        -Djavax.net.ssl.keyStore=/etc/credito/mtls/lending-service/lending-service.p12
+        -Djavax.net.ssl.keyStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}
+        -Djavax.net.ssl.trustStore=/etc/credito/mtls/truststore.p12
+        -Djavax.net.ssl.trustStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}
+
+  batch-service:
+    environment:
+      JAVA_TOOL_OPTIONS: >-
+        -Djavax.net.ssl.keyStore=/etc/credito/mtls/batch-service/batch-service.p12
+        -Djavax.net.ssl.keyStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}
+        -Djavax.net.ssl.trustStore=/etc/credito/mtls/truststore.p12
+        -Djavax.net.ssl.trustStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}

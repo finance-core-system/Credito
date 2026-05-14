@@ -46,11 +46,6 @@ services:
       MANAGEMENT_USERNAME: ${MANAGEMENT_USERNAME:?MANAGEMENT_USERNAME is required}
       MANAGEMENT_PASSWORD: ${MANAGEMENT_PASSWORD:?MANAGEMENT_PASSWORD is required}
       MTLS_KEY_STORE: /etc/credito/mtls/gateway-service/gateway-service.p12
-      JAVA_TOOL_OPTIONS: >-
-        -Djavax.net.ssl.keyStore=/etc/credito/mtls/gateway-service/gateway-service.p12
-        -Djavax.net.ssl.keyStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}
-        -Djavax.net.ssl.trustStore=/etc/credito/mtls/truststore.p12
-        -Djavax.net.ssl.trustStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}
     volumes:
       - ./infra/mtls/generated:/etc/credito/mtls:ro
     ports:
@@ -121,11 +116,6 @@ services:
       <<: [*resource-server-env, *mtls-env]
       SERVER_PORT: ${CUSTOMER_SERVICE_PORT}
       MTLS_KEY_STORE: /etc/credito/mtls/customer-service/customer-service.p12
-      JAVA_TOOL_OPTIONS: >-
-        -Djavax.net.ssl.keyStore=/etc/credito/mtls/customer-service/customer-service.p12
-        -Djavax.net.ssl.keyStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}
-        -Djavax.net.ssl.trustStore=/etc/credito/mtls/truststore.p12
-        -Djavax.net.ssl.trustStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}
     volumes:
       - ./infra/mtls/generated:/etc/credito/mtls:ro
     expose:
@@ -148,11 +138,6 @@ services:
       <<: [*resource-server-env, *mtls-env]
       SERVER_PORT: ${ACCOUNT_SERVICE_PORT}
       MTLS_KEY_STORE: /etc/credito/mtls/account-service/account-service.p12
-      JAVA_TOOL_OPTIONS: >-
-        -Djavax.net.ssl.keyStore=/etc/credito/mtls/account-service/account-service.p12
-        -Djavax.net.ssl.keyStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}
-        -Djavax.net.ssl.trustStore=/etc/credito/mtls/truststore.p12
-        -Djavax.net.ssl.trustStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}
     volumes:
       - ./infra/mtls/generated:/etc/credito/mtls:ro
     expose:
@@ -175,11 +160,6 @@ services:
       <<: [*resource-server-env, *mtls-env]
       SERVER_PORT: ${LENDING_SERVICE_PORT}
       MTLS_KEY_STORE: /etc/credito/mtls/lending-service/lending-service.p12
-      JAVA_TOOL_OPTIONS: >-
-        -Djavax.net.ssl.keyStore=/etc/credito/mtls/lending-service/lending-service.p12
-        -Djavax.net.ssl.keyStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}
-        -Djavax.net.ssl.trustStore=/etc/credito/mtls/truststore.p12
-        -Djavax.net.ssl.trustStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}
     volumes:
       - ./infra/mtls/generated:/etc/credito/mtls:ro
     expose:
@@ -202,11 +182,6 @@ services:
       <<: [*resource-server-env, *mtls-env]
       SERVER_PORT: ${BATCH_SERVICE_PORT}
       MTLS_KEY_STORE: /etc/credito/mtls/batch-service/batch-service.p12
-      JAVA_TOOL_OPTIONS: >-
-        -Djavax.net.ssl.keyStore=/etc/credito/mtls/batch-service/batch-service.p12
-        -Djavax.net.ssl.keyStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}
-        -Djavax.net.ssl.trustStore=/etc/credito/mtls/truststore.p12
-        -Djavax.net.ssl.trustStorePassword=${MTLS_STORE_PASSWORD:?MTLS_STORE_PASSWORD is required}
     volumes:
       - ./infra/mtls/generated:/etc/credito/mtls:ro
     expose:

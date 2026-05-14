@@ -225,13 +225,23 @@ INTERNAL_SERVICE_SCHEME=https
 
 ### Outbound Client Certificate
 
-compose는 각 Java 프로세스에 `JAVA_TOOL_OPTIONS`로 JVM 기본 keyStore/trustStore도 지정한다.
+기본 `docker-compose.yml`은 `JAVA_TOOL_OPTIONS`로 JVM trustStore를 지정하지 않는다. 이 상태에서는 JVM이 기본 `cacerts` 신뢰 체인을 사용하므로, 공개 CA 기반 외부 HTTPS 호출 경로를 유지한다.
+
+mTLS outbound client certificate와 내부 CA trustStore가 필요한 실행은 `docker-compose.mtls.yml` overlay를 함께 사용한다. overlay는 각 Java 프로세스에 다음 JVM SSL system property를 주입한다.
 
 ```text
 javax.net.ssl.keyStore
 javax.net.ssl.keyStorePassword
 javax.net.ssl.trustStore
 javax.net.ssl.trustStorePassword
+```
+
+```bash
+MTLS_ENABLED=true \
+MTLS_CLIENT_AUTH=need \
+MTLS_STORE_PASSWORD=changeit \
+INTERNAL_SERVICE_SCHEME=https \
+docker compose -f docker-compose.yml -f docker-compose.mtls.yml up
 ```
 
 현재 프로젝트에는 내부 서비스 호출 전용 HTTP client bean이 아직 없다. 따라서 이 설정은 JVM 기본 SSL context를 사용하는 client가 생겼을 때 같은 인증서 파일을 참조하도록 준비하는 단계다.
@@ -246,6 +256,7 @@ javax.net.ssl.trustStorePassword
 - dev/compose 자체 CA와 서비스별 인증서 생성 방식이 스크립트로 재현 가능해졌다.
 - 각 Spring 서비스가 keystore/truststore를 환경변수로 참조할 수 있다.
 - Gateway route는 `INTERNAL_SERVICE_SCHEME`으로 HTTP/HTTPS 전환이 가능하다.
+- mTLS overlay를 붙이지 않은 기본 compose 실행은 JVM 기본 `cacerts`를 유지한다.
 
 남아 있는 점:
 
