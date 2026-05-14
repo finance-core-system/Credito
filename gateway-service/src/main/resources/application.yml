@@ -7,19 +7,19 @@ spring:
         webmvc:
           routes:
             - id: customer-service-route
-              uri: http://customer-service:${CUSTOMER_SERVICE_PORT}
+              uri: ${INTERNAL_SERVICE_SCHEME}://customer-service:${CUSTOMER_SERVICE_PORT}
               predicates:
                 - Path=/api/customers/**
             - id: account-service-route
-              uri: http://account-service:${ACCOUNT_SERVICE_PORT}
+              uri: ${INTERNAL_SERVICE_SCHEME}://account-service:${ACCOUNT_SERVICE_PORT}
               predicates:
                 - Path=/api/accounts/**
             - id: lending-service-route
-              uri: http://lending-service:${LENDING_SERVICE_PORT}
+              uri: ${INTERNAL_SERVICE_SCHEME}://lending-service:${LENDING_SERVICE_PORT}
               predicates:
                 - Path=/api/lendings/**
             - id: batch-service-route
-              uri: http://batch-service:${BATCH_SERVICE_PORT}
+              uri: ${INTERNAL_SERVICE_SCHEME}://batch-service:${BATCH_SERVICE_PORT}
               predicates:
                 - Path=/api/batch/**
   security:
@@ -46,6 +46,15 @@ credito:
 server:
   port: ${SERVER_PORT}
   forward-headers-strategy: framework
+  ssl:
+    enabled: ${MTLS_ENABLED}
+    key-store: ${MTLS_KEY_STORE}
+    key-store-password: ${MTLS_KEY_STORE_PASSWORD}
+    key-store-type: ${MTLS_KEY_STORE_TYPE}
+    trust-store: ${MTLS_TRUST_STORE}
+    trust-store-password: ${MTLS_TRUST_STORE_PASSWORD}
+    trust-store-type: ${MTLS_TRUST_STORE_TYPE}
+    client-auth: ${MTLS_CLIENT_AUTH}
 
 management:
   server:

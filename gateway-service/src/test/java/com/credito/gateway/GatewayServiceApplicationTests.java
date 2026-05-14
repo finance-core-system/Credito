@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 	        "ACCOUNT_SERVICE_PORT=8082",
 	        "LENDING_SERVICE_PORT=8083",
 	        "BATCH_SERVICE_PORT=8084",
+	        "INTERNAL_SERVICE_SCHEME=http",
 	        "MANAGEMENT_SERVER_PORT=0",
 	        "MANAGEMENT_USERNAME=test-actuator",
 	        "MANAGEMENT_PASSWORD=test-secret",
@@ -36,7 +37,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 	        "ADMIN_REALM_ISSUER_URI=http://localhost:8085/realms/admin-realm",
 	        "ADMIN_REALM_JWK_SET_URI=http://localhost:8085/realms/admin-realm/protocol/openid-connect/certs",
 	        "ADMIN_REALM_INTERNAL_ISSUER_URI=http://keycloak:8080/realms/admin-realm",
-	        "ADMIN_REALM_INTERNAL_JWK_SET_URI=http://localhost:8085/realms/admin-realm/protocol/openid-connect/certs"
+	        "ADMIN_REALM_INTERNAL_JWK_SET_URI=http://localhost:8085/realms/admin-realm/protocol/openid-connect/certs",
+	        "MTLS_ENABLED=false",
+	        "MTLS_KEY_STORE=",
+	        "MTLS_KEY_STORE_PASSWORD=",
+	        "MTLS_KEY_STORE_TYPE=PKCS12",
+	        "MTLS_TRUST_STORE=",
+	        "MTLS_TRUST_STORE_PASSWORD=",
+	        "MTLS_TRUST_STORE_TYPE=PKCS12",
+	        "MTLS_CLIENT_AUTH=none"
 	    }
 	)
 class GatewayServiceApplicationTests {

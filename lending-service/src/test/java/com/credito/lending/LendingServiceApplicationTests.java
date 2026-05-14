@@ -21,7 +21,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
         "ADMIN_REALM_ISSUER_URI=http://localhost:8085/realms/admin-realm",
         "ADMIN_REALM_JWK_SET_URI=http://localhost:8085/realms/admin-realm/protocol/openid-connect/certs",
         "ADMIN_REALM_INTERNAL_ISSUER_URI=http://keycloak:8080/realms/admin-realm",
-        "ADMIN_REALM_INTERNAL_JWK_SET_URI=http://localhost:8085/realms/admin-realm/protocol/openid-connect/certs"
+        "ADMIN_REALM_INTERNAL_JWK_SET_URI=http://localhost:8085/realms/admin-realm/protocol/openid-connect/certs",
+        "MTLS_ENABLED=false",
+        "MTLS_KEY_STORE=",
+        "MTLS_KEY_STORE_PASSWORD=",
+        "MTLS_KEY_STORE_TYPE=PKCS12",
+        "MTLS_TRUST_STORE=",
+        "MTLS_TRUST_STORE_PASSWORD=",
+        "MTLS_TRUST_STORE_TYPE=PKCS12",
+        "MTLS_CLIENT_AUTH=none"
     })
 class LendingServiceApplicationTests {
 
