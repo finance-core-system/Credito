@@ -15,10 +15,11 @@ class ServiceTokenValidatorTest {
     @Test
     void acceptsTokenWithAllowedIssuerAudienceAndClient() {
         var result = ServiceTokenValidator.validate(
-            jwt("https://auth.credito.local/realms/credito", List.of("account-service"), "gateway-service"),
+            jwt("https://auth.credito.local/realms/credito", List.of("credito-internal-api"), "gateway-service"),
             List.of("https://auth.credito.local/realms/credito"),
-            List.of("account-service"),
-            List.of("gateway-service"));
+            List.of("credito-internal-api"),
+            List.of("gateway-service"),
+            List.of("accounts.read"));
 
         assertTrue(result.valid());
     }
@@ -26,10 +27,11 @@ class ServiceTokenValidatorTest {
     @Test
     void rejectsTokenWithUnexpectedClient() {
         var result = ServiceTokenValidator.validate(
-            jwt("https://auth.credito.local/realms/credito", List.of("account-service"), "unknown-service"),
+            jwt("https://auth.credito.local/realms/credito", List.of("credito-internal-api"), "unknown-service"),
             List.of("https://auth.credito.local/realms/credito"),
-            List.of("account-service"),
-            List.of("gateway-service"));
+            List.of("credito-internal-api"),
+            List.of("gateway-service"),
+            List.of("accounts.read"));
 
         assertFalse(result.valid());
     }
@@ -39,8 +41,9 @@ class ServiceTokenValidatorTest {
         var result = ServiceTokenValidator.validate(
             jwtWithoutAudience("https://auth.credito.local/realms/credito", "gateway-service"),
             List.of("https://auth.credito.local/realms/credito"),
-            List.of("account-service"),
-            List.of("gateway-service"));
+            List.of("credito-internal-api"),
+            List.of("gateway-service"),
+            List.of("accounts.read"));
 
         assertFalse(result.valid());
     }
@@ -50,8 +53,33 @@ class ServiceTokenValidatorTest {
         var result = ServiceTokenValidator.validate(
             jwt("https://auth.credito.local/realms/credito", List.of(), "gateway-service"),
             List.of("https://auth.credito.local/realms/credito"),
-            List.of("account-service"),
-            List.of("gateway-service"));
+            List.of("credito-internal-api"),
+            List.of("gateway-service"),
+            List.of("accounts.read"));
+
+        assertFalse(result.valid());
+    }
+
+    @Test
+    void rejectsTokenWithoutRequiredScope() {
+        var result = ServiceTokenValidator.validate(
+            jwt("https://auth.credito.local/realms/credito", List.of("credito-internal-api"), "gateway-service"),
+            List.of("https://auth.credito.local/realms/credito"),
+            List.of("credito-internal-api"),
+            List.of("gateway-service"),
+            List.of("accounts.write"));
+
+        assertFalse(result.valid());
+    }
+
+    @Test
+    void rejectsExpiredToken() {
+        var result = ServiceTokenValidator.validate(
+            expiredJwt("https://auth.credito.local/realms/credito", List.of("credito-internal-api"), "gateway-service"),
+            List.of("https://auth.credito.local/realms/credito"),
+            List.of("credito-internal-api"),
+            List.of("gateway-service"),
+            List.of("accounts.read"));
 
         assertFalse(result.valid());
     }
@@ -65,7 +93,8 @@ class ServiceTokenValidatorTest {
             Map.of(
                 "iss", issuer,
                 "aud", audiences,
-                "azp", clientId));
+                "azp", clientId,
+                "scope", "accounts.read customers.read"));
     }
 
     private static Jwt jwtWithoutAudience(String issuer, String clientId) {
@@ -76,6 +105,20 @@ class ServiceTokenValidatorTest {
             Map.of("alg", "none"),
             Map.of(
                 "iss", issuer,
-                "azp", clientId));
+                "azp", clientId,
+                "scope", "accounts.read"));
+    }
+
+    private static Jwt expiredJwt(String issuer, List<String> audiences, String clientId) {
+        return new Jwt(
+            "token",
+            Instant.now().minusSeconds(120),
+            Instant.now().minusSeconds(60),
+            Map.of("alg", "none"),
+            Map.of(
+                "iss", issuer,
+                "aud", audiences,
+                "azp", clientId,
+                "scope", "accounts.read"));
     }
 }

@@ -41,6 +41,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = {
+        AccountServiceApplication.class,
+        AccountServiceApplicationTests.TestEndpointConfiguration.class
+    },
     properties = {
         "SERVER_PORT=0",
         "MTLS_ENABLED=false",
@@ -50,7 +54,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
         "MTLS_TRUST_STORE=",
         "MTLS_TRUST_STORE_PASSWORD=",
         "MTLS_TRUST_STORE_TYPE=PKCS12",
-        "MTLS_CLIENT_AUTH=none"
+        "MTLS_CLIENT_AUTH=none",
+        "credito.security.resource-server.service-token.require-client-certificate=false"
     })
 class AccountServiceApplicationTests {
 
@@ -62,6 +67,8 @@ class AccountServiceApplicationTests {
         .build();
     private static final HttpServer JWK_SERVER = startJwkServer();
     private static final String ISSUER_URI = "http://localhost:" + JWK_SERVER.getAddress().getPort() + "/realms/customer-realm";
+    private static final String SYSTEM_ISSUER_URI =
+        "http://localhost:" + JWK_SERVER.getAddress().getPort() + "/realms/system-realm";
     private static final String JWK_SET_URI = "http://localhost:" + JWK_SERVER.getAddress().getPort() + "/jwks";
 
     @LocalServerPort
@@ -80,6 +87,10 @@ class AccountServiceApplicationTests {
         registry.add("ADMIN_REALM_JWK_SET_URI", () -> JWK_SET_URI);
         registry.add("ADMIN_REALM_INTERNAL_ISSUER_URI", () -> "http://keycloak:8080/realms/admin-realm");
         registry.add("ADMIN_REALM_INTERNAL_JWK_SET_URI", () -> JWK_SET_URI);
+        registry.add("SYSTEM_REALM_ISSUER_URI", () -> SYSTEM_ISSUER_URI);
+        registry.add("SYSTEM_REALM_JWK_SET_URI", () -> JWK_SET_URI);
+        registry.add("SYSTEM_REALM_INTERNAL_ISSUER_URI", () -> "http://keycloak:8080/realms/system-realm");
+        registry.add("SYSTEM_REALM_INTERNAL_JWK_SET_URI", () -> JWK_SET_URI);
     }
 
     @AfterAll
@@ -138,6 +149,35 @@ class AccountServiceApplicationTests {
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 
+    @Test
+    void serviceTokenWithAllowedClientAndScopeCanAccessAccountsApi() throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(serviceToken("gateway-service", "accounts.read"));
+
+        ResponseEntity<String> response = restTemplate.exchange(
+            "http://localhost:" + port + "/api/accounts",
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            String.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("accounts", response.getBody());
+    }
+
+    @Test
+    void serviceTokenWithMissingScopeIsRejected() throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(serviceToken("gateway-service", "customers.read"));
+
+        ResponseEntity<String> response = restTemplate.exchange(
+            "http://localhost:" + port + "/api/accounts",
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            String.class);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    }
+
     private static String tokenWithAudience(String audience) throws Exception {
         Instant now = Instant.now();
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
@@ -148,6 +188,26 @@ class AccountServiceApplicationTests {
             .expirationTime(Date.from(now.plusSeconds(300)))
             .jwtID(UUID.randomUUID().toString())
             .claim("roles", List.of("ROLE_CUSTOMER"))
+            .build();
+
+        SignedJWT jwt = new SignedJWT(
+            new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(KEY_ID).build(),
+            claimsSet);
+        jwt.sign(new RSASSASigner(JWK));
+        return jwt.serialize();
+    }
+
+    private static String serviceToken(String clientId, String scope) throws Exception {
+        Instant now = Instant.now();
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+            .issuer(SYSTEM_ISSUER_URI)
+            .subject("service-account-" + clientId)
+            .audience("credito-internal-api")
+            .issueTime(Date.from(now))
+            .expirationTime(Date.from(now.plusSeconds(300)))
+            .jwtID(UUID.randomUUID().toString())
+            .claim("azp", clientId)
+            .claim("scope", scope)
             .build();
 
         SignedJWT jwt = new SignedJWT(
@@ -201,6 +261,11 @@ class AccountServiceApplicationTests {
         @GetMapping("/test/authenticated")
         String authenticated() {
             return "authenticated";
+        }
+
+        @GetMapping("/api/accounts")
+        String accounts() {
+            return "accounts";
         }
     }
 }

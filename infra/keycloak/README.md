@@ -32,7 +32,21 @@ Inside Compose networks, services should use the container address issuer base:
 | --- | --- | --- | --- |
 | `customer-realm` | `credito-customer-web` | `credito-api` | Authorization Code + PKCE |
 | `admin-realm` | `credito-admin-console` | `credito-admin-api` | Authorization Code |
-| `system-realm` | `credito-service-client` | `credito-internal-api` | Client Credentials |
+| `system-realm` | `gateway-service` | `credito-internal-api` | Client Credentials |
+| `system-realm` | `customer-service` | `credito-internal-api` | Client Credentials |
+| `system-realm` | `account-service` | `credito-internal-api` | Client Credentials |
+| `system-realm` | `lending-service` | `credito-internal-api` | Client Credentials |
+| `system-realm` | `batch-service` | `credito-internal-api` | Client Credentials |
+
+`system-realm` service clients can request only the client scopes assigned to each client:
+
+| Client ID | Requestable scopes |
+| --- | --- |
+| `gateway-service` | `customers.read`, `accounts.read`, `lendings.read`, `batch.run` |
+| `customer-service` | none |
+| `account-service` | `customers.read` |
+| `lending-service` | `customers.read`, `accounts.read` |
+| `batch-service` | `accounts.read`, `lendings.read` |
 
 Resource servers should validate:
 
@@ -41,7 +55,8 @@ Resource servers should validate:
 - `azp` or `client_id`: the expected Keycloak client identity.
 - `exp`: token expiry.
 
-The service-specific JWT validation and service-token authorization rules are intentionally handled in later security issues.
+Service-token authorization rules are configured in each receiving service under
+`credito.security.resource-server.service-token`.
 
 ## Admin MFA and roles
 

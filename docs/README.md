@@ -8,4 +8,5 @@
 - [Mutual TLS](security/mtls.md)
 - [Audit Logging](security/audit.md)
 - [Keycloak](security/keycloak.md)
+- [Service Token Flow](security/service-token.md)
 - [Fixed-Length Message Protocol](protocol/fixed-length-message.md)

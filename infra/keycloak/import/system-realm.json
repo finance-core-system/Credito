@@ -16,16 +16,38 @@
       }
     ]
   },
+  "clientScopes": [
+    {
+      "name": "customers.read",
+      "description": "Read customer data through internal APIs",
+      "protocol": "openid-connect"
+    },
+    {
+      "name": "accounts.read",
+      "description": "Read account data through internal APIs",
+      "protocol": "openid-connect"
+    },
+    {
+      "name": "lendings.read",
+      "description": "Read lending data through internal APIs",
+      "protocol": "openid-connect"
+    },
+    {
+      "name": "batch.run",
+      "description": "Run internal batch APIs",
+      "protocol": "openid-connect"
+    }
+  ],
   "clients": [
     {
-      "clientId": "credito-service-client",
-      "name": "Credito Service Client",
-      "description": "Development client for internal service-token issuance",
+      "clientId": "gateway-service",
+      "name": "Gateway Service",
+      "description": "Service account used by the gateway for internal service calls",
       "enabled": true,
       "protocol": "openid-connect",
       "publicClient": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "dev-service-client-secret",
+      "secret": "dev-gateway-service-secret",
       "standardFlowEnabled": false,
       "implicitFlowEnabled": false,
       "directAccessGrantsEnabled": false,
@@ -45,12 +67,149 @@
         }
       ],
       "defaultClientScopes": [
-        "roles",
-        "profile",
-        "email"
+        "roles"
       ],
       "optionalClientScopes": [
-        "microprofile-jwt"
+        "customers.read",
+        "accounts.read",
+        "lendings.read",
+        "batch.run"
+      ]
+    },
+    {
+      "clientId": "customer-service",
+      "name": "Customer Service",
+      "description": "Service account used by the customer service for internal service calls",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "dev-customer-service-secret",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "frontchannelLogout": false,
+      "protocolMappers": [
+        {
+          "name": "credito-internal-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "credito-internal-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ],
+      "defaultClientScopes": [
+        "roles"
+      ],
+      "optionalClientScopes": []
+    },
+    {
+      "clientId": "account-service",
+      "name": "Account Service",
+      "description": "Service account used by the account service for internal service calls",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "dev-account-service-secret",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "frontchannelLogout": false,
+      "protocolMappers": [
+        {
+          "name": "credito-internal-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "credito-internal-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ],
+      "defaultClientScopes": [
+        "roles"
+      ],
+      "optionalClientScopes": [
+        "customers.read"
+      ]
+    },
+    {
+      "clientId": "lending-service",
+      "name": "Lending Service",
+      "description": "Service account used by the lending service for internal service calls",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "dev-lending-service-secret",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "frontchannelLogout": false,
+      "protocolMappers": [
+        {
+          "name": "credito-internal-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "credito-internal-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ],
+      "defaultClientScopes": [
+        "roles"
+      ],
+      "optionalClientScopes": [
+        "customers.read",
+        "accounts.read"
+      ]
+    },
+    {
+      "clientId": "batch-service",
+      "name": "Batch Service",
+      "description": "Service account used by the batch service for internal service calls",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "dev-batch-service-secret",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "frontchannelLogout": false,
+      "protocolMappers": [
+        {
+          "name": "credito-internal-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "credito-internal-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ],
+      "defaultClientScopes": [
+        "roles"
+      ],
+      "optionalClientScopes": [
+        "accounts.read",
+        "lendings.read"
       ]
     }
   ]
