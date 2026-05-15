@@ -40,6 +40,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = {
+        LendingServiceApplication.class,
+        LendingServiceApplicationTests.TestEndpointConfiguration.class
+    },
     properties = {
         "SERVER_PORT=0",
         "MTLS_ENABLED=false",

@@ -51,6 +51,20 @@ class ServiceTokenAuthorizationFilterTest {
     }
 
     @Test
+    void rejectsProtectedRequestWithoutClientCertificate() throws Exception {
+        ServiceTokenAuthorizationFilter filter = new ServiceTokenAuthorizationFilter(properties(true));
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt("gateway-service", "accounts.read")));
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/accounts/123");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        CountingFilterChain chain = new CountingFilterChain();
+
+        filter.doFilter(request, response, chain);
+
+        assertEquals(403, response.getStatus());
+        assertEquals(0, chain.count);
+    }
+
+    @Test
     void skipsRequestOutsideConfiguredRules() throws Exception {
         ServiceTokenAuthorizationFilter filter = new ServiceTokenAuthorizationFilter(properties(true));
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/actuator/health");

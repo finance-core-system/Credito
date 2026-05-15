@@ -57,6 +57,7 @@ class ServiceTokenClientTest {
         assertEquals("accounts.read", response.scope());
         assertTrue(requestBody.get().contains("grant_type=client_credentials"));
         assertTrue(requestBody.get().contains("client_id=gateway-service"));
+        assertTrue(requestBody.get().contains("client_secret=secret"));
         assertTrue(requestBody.get().contains("scope=accounts.read"));
     }
 

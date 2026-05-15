@@ -105,7 +105,8 @@ class ServiceTokenValidatorTest {
             Map.of("alg", "none"),
             Map.of(
                 "iss", issuer,
-                "azp", clientId));
+                "azp", clientId,
+                "scope", "accounts.read"));
     }
 
     private static Jwt expiredJwt(String issuer, List<String> audiences, String clientId) {
