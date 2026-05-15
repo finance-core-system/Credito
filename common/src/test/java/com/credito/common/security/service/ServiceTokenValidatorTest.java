@@ -15,9 +15,9 @@ class ServiceTokenValidatorTest {
     @Test
     void acceptsTokenWithAllowedIssuerAudienceAndClient() {
         var result = ServiceTokenValidator.validate(
-            jwt("https://auth.credito.local/realms/credito", List.of("account-service"), "gateway-service"),
+            jwt("https://auth.credito.local/realms/credito", List.of("credito-internal-api"), "gateway-service"),
             List.of("https://auth.credito.local/realms/credito"),
-            List.of("account-service"),
+            List.of("credito-internal-api"),
             List.of("gateway-service"),
             List.of("accounts.read"));
 
@@ -27,9 +27,9 @@ class ServiceTokenValidatorTest {
     @Test
     void rejectsTokenWithUnexpectedClient() {
         var result = ServiceTokenValidator.validate(
-            jwt("https://auth.credito.local/realms/credito", List.of("account-service"), "unknown-service"),
+            jwt("https://auth.credito.local/realms/credito", List.of("credito-internal-api"), "unknown-service"),
             List.of("https://auth.credito.local/realms/credito"),
-            List.of("account-service"),
+            List.of("credito-internal-api"),
             List.of("gateway-service"),
             List.of("accounts.read"));
 
@@ -41,7 +41,7 @@ class ServiceTokenValidatorTest {
         var result = ServiceTokenValidator.validate(
             jwtWithoutAudience("https://auth.credito.local/realms/credito", "gateway-service"),
             List.of("https://auth.credito.local/realms/credito"),
-            List.of("account-service"),
+            List.of("credito-internal-api"),
             List.of("gateway-service"),
             List.of("accounts.read"));
 
@@ -53,7 +53,7 @@ class ServiceTokenValidatorTest {
         var result = ServiceTokenValidator.validate(
             jwt("https://auth.credito.local/realms/credito", List.of(), "gateway-service"),
             List.of("https://auth.credito.local/realms/credito"),
-            List.of("account-service"),
+            List.of("credito-internal-api"),
             List.of("gateway-service"),
             List.of("accounts.read"));
 
@@ -63,9 +63,9 @@ class ServiceTokenValidatorTest {
     @Test
     void rejectsTokenWithoutRequiredScope() {
         var result = ServiceTokenValidator.validate(
-            jwt("https://auth.credito.local/realms/credito", List.of("account-service"), "gateway-service"),
+            jwt("https://auth.credito.local/realms/credito", List.of("credito-internal-api"), "gateway-service"),
             List.of("https://auth.credito.local/realms/credito"),
-            List.of("account-service"),
+            List.of("credito-internal-api"),
             List.of("gateway-service"),
             List.of("accounts.write"));
 
@@ -75,9 +75,9 @@ class ServiceTokenValidatorTest {
     @Test
     void rejectsExpiredToken() {
         var result = ServiceTokenValidator.validate(
-            expiredJwt("https://auth.credito.local/realms/credito", List.of("account-service"), "gateway-service"),
+            expiredJwt("https://auth.credito.local/realms/credito", List.of("credito-internal-api"), "gateway-service"),
             List.of("https://auth.credito.local/realms/credito"),
-            List.of("account-service"),
+            List.of("credito-internal-api"),
             List.of("gateway-service"),
             List.of("accounts.read"));
 

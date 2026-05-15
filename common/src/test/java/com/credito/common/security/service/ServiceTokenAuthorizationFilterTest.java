@@ -70,6 +70,7 @@ class ServiceTokenAuthorizationFilterTest {
         rule.setRequiredScopes(Set.of("accounts.read"));
 
         CreditoResourceServerProperties.ServiceToken properties = new CreditoResourceServerProperties.ServiceToken();
+        properties.setEnabled(true);
         properties.setRequireClientCertificate(requireClientCertificate);
         properties.setAllowedIssuers(Set.of("https://auth.credito.local/realms/system-realm"));
         properties.setAllowedAudiences(Set.of("credito-internal-api"));

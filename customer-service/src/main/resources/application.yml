@@ -23,6 +23,7 @@ credito:
         - issuer-uri: ${SYSTEM_REALM_INTERNAL_ISSUER_URI}
           jwk-set-uri: ${SYSTEM_REALM_INTERNAL_JWK_SET_URI}
       service-token:
+        enabled: true
         allowed-issuers:
           - ${SYSTEM_REALM_ISSUER_URI}
           - ${SYSTEM_REALM_INTERNAL_ISSUER_URI}

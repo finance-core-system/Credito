@@ -108,7 +108,7 @@ public class CreditoResourceServerProperties {
      */
     public static class ServiceToken {
 
-        private boolean enabled = true;
+        private boolean enabled = false;
         private boolean requireClientCertificate = true;
         private Set<String> allowedIssuers = new LinkedHashSet<>();
         private Set<String> allowedAudiences = new LinkedHashSet<>();

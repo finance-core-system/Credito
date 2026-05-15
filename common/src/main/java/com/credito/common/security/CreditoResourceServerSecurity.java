@@ -116,8 +116,11 @@ public final class CreditoResourceServerSecurity {
     }
 
     private static void validateServiceToken(CreditoResourceServerProperties.ServiceToken serviceToken) {
-        if (serviceToken == null || !serviceToken.isEnabled() || serviceToken.getRules().isEmpty()) {
+        if (serviceToken == null || !serviceToken.isEnabled()) {
             return;
+        }
+        if (serviceToken.getRules() == null || serviceToken.getRules().isEmpty()) {
+            throw new IllegalStateException("service-token 규칙을 하나 이상 설정하거나 enabled=false로 비활성화해야 합니다.");
         }
         if (serviceToken.getAllowedIssuers().isEmpty()) {
             throw new IllegalStateException("service-token issuer를 하나 이상 설정해야 합니다.");

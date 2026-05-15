@@ -72,10 +72,19 @@ public class ServiceTokenClient {
             }
 
             Map<String, Object> body = objectMapper.readValue(response.body(), TOKEN_RESPONSE_TYPE);
-            return new ServiceTokenResponse(
+            String accessToken = requireText(
                 stringValue(body.get("access_token")),
+                "token endpoint 응답에 access_token이 없습니다.");
+            String tokenType = requireText(
                 stringValue(body.get("token_type")),
-                longValue(body.get("expires_in")),
+                "token endpoint 응답에 token_type이 없습니다.");
+            long expiresIn = requirePositiveLong(
+                body.get("expires_in"),
+                "token endpoint 응답에 expires_in이 없거나 유효하지 않습니다.");
+            return new ServiceTokenResponse(
+                accessToken,
+                tokenType,
+                expiresIn,
                 stringValue(body.get("scope")));
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
@@ -112,19 +121,31 @@ public class ServiceTokenClient {
         return value == null ? null : value.toString();
     }
 
-    private static long longValue(Object value) {
+    private static long requirePositiveLong(Object value, String message) {
         if (value instanceof Number number) {
-            return number.longValue();
+            long parsed = number.longValue();
+            if (parsed > 0) {
+                return parsed;
+            }
+            throw new ServiceTokenException(message);
         }
         if (value == null) {
-            return 0L;
+            throw new ServiceTokenException(message);
         }
-        return Long.parseLong(value.toString());
+        try {
+            long parsed = Long.parseLong(value.toString());
+            if (parsed > 0) {
+                return parsed;
+            }
+            throw new ServiceTokenException(message);
+        } catch (NumberFormatException exception) {
+            throw new ServiceTokenException(message, exception);
+        }
     }
 
     private static String requireText(String value, String message) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(message);
+            throw new ServiceTokenException(message);
         }
         return value;
     }

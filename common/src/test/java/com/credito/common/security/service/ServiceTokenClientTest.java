@@ -13,6 +13,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ServiceTokenClientTest {
@@ -57,6 +58,25 @@ class ServiceTokenClientTest {
         assertTrue(requestBody.get().contains("grant_type=client_credentials"));
         assertTrue(requestBody.get().contains("client_id=gateway-service"));
         assertTrue(requestBody.get().contains("scope=accounts.read"));
+    }
+
+    @Test
+    void rejectsTokenResponseWithoutRequiredFields() throws Exception {
+        server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
+        server.createContext("/token", exchange -> respond(exchange, 200, """
+            {
+              "token_type": "Bearer",
+              "expires_in": 300
+            }
+            """));
+        server.start();
+
+        ServiceTokenClient client = new ServiceTokenClient(
+            URI.create("http://localhost:" + server.getAddress().getPort() + "/token"),
+            "gateway-service",
+            "secret");
+
+        assertThrows(ServiceTokenException.class, () -> client.issueToken(List.of("accounts.read")));
     }
 
     private static void respond(com.sun.net.httpserver.HttpExchange exchange, int status, String body) throws IOException {

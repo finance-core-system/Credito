@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.security.oauth2.jwt.Jwt;
 
@@ -109,7 +110,11 @@ public final class ServiceTokenValidator {
         if (values == null || values.isEmpty()) {
             return Set.of();
         }
-        return Set.copyOf(values);
+        return values.stream()
+            .filter(Objects::nonNull)
+            .map(String::trim)
+            .filter(value -> !value.isEmpty())
+            .collect(Collectors.toUnmodifiableSet());
     }
 
     /**
